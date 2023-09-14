@@ -1,6 +1,7 @@
 # SDA-Intro-Problem
 Space Domain Awareness Intro problem, deals with multi-target tracking, Kalman Filters, and optimization of sensor tasking.
 
+
 Files Included:
 
 Entities - Houses entity, sensor, and robot classes.
@@ -10,6 +11,7 @@ Functions - Houses KF and Errorbar functions.
 Plots - Houses state estimation plots and enviroment visualization.
 
 Main - Runs simulations and calls other files.
+
 
 Currently:
 
@@ -21,9 +23,11 @@ Sensors can be set to prioritize a certain robot.
 
 Plots necessary graphs.
 
+
 Up next:
 
 Task sensor by minimizing a cost function. 
+
 
 Assumptions:
 
