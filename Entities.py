@@ -115,7 +115,7 @@ class Robot(Entity):
             
         if X_k_prop[1] >= self.l[1]:
             X_k_prop[1] = 2*self.l[1] - X_k_prop[1]
-            #v_x should always be (+) if hits top wall
+            #v_x should always be (-) if hits top wall
             X_k_prop[3] = -1 * abs(X_k_prop[3])
             
         if X_k_prop[1] <= 0:

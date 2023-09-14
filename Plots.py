@@ -20,7 +20,7 @@ def PlotRoom(robots):
     plt.axhline(robots[0].l[1], c='black', zorder=0)
     for i in range(len(robots)):
         plt.scatter(robots[i].X_act[0, :], robots[i].X_act[1, :], c = colors[i], s = 40, label='Robot %i act' % (i+1))
-        plt.scatter(robots[i].X_est[0, :], robots[i].X_est[1, :], c = 'r', s = 6)#, label='Robot %i est' % (i+1))
+        plt.scatter(robots[i].X_est[0, :], robots[i].X_est[1, :], c = 'r', s = 6, label = "Robot est")
     plt.legend(loc="best")
     plt.xlim(0 - 2, robots[0].l[0] + 2)
     plt.ylim(0 - 2, robots[0].l[1] + 2)
@@ -42,6 +42,7 @@ def PlotGraph(robots):
                 graphs[i][j].set_title(plots[count])
                 count += 1
         fig.suptitle("Robot %i States vs. Time" % (k+1))
+        fig.legend(loc="upper right")
         fig.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
         plt.xlabel("Time")
