@@ -6,7 +6,6 @@ Created on Wed Sep 13 21:33:21 2023
 """
 
 # Working Version
-# Adding in KF, assumes measurements given as r_x and r_y of k+1 X
 
 import sympy as sp
 import numpy as np
@@ -19,22 +18,26 @@ class Entity(object):
     dim_msmt = 2
     
     time_start = 0
-    time_end = 10
-    h = .5
+    time_end = 30
+    h = .1
     t = np.arange(time_start, time_end + h, h)
     
     G = h*np.identity(dim_state)
     M = np.identity(dim_msmt)
     
     sig_bounds = 3
+    
+    robot_count = 0
 
 class Sensor(Entity):
     def __init__(self, sensor_position, field_of_view, R_sensor):
         self.pos = sensor_position
         self.FoV = field_of_view
         self.target = None
+        self.targets_over_time = np.zeros(self.t.size)
         self.v = (0, R_sensor)
         self.K = np.zeros((self.dim_state, self.dim_state))
+        self.robots_in_FoV = []
     
     def InFoV(self, X):
         # Must always be called before Obs() is called
@@ -44,8 +47,9 @@ class Sensor(Entity):
         in_y_range = self.FoV[1, 0] <= X[1] <= self.FoV[1, 1]
         return in_x_range and in_y_range 
     
-    def SwitchTarget(self, new_target):
+    def SwitchTarget(self, new_target, k, robot_id):
         self.target = new_target
+        self.targets_over_time[k] = robot_id+1
         
     def Obs(self, X, is_act):
         # Will need to change when sensor position changes
@@ -66,6 +70,8 @@ class Sensor(Entity):
 
 class Robot(Entity):
     def __init__(self, vel, start_pos, Q_robot):
+        self.robot_count += 1
+        self.id = self.robot_count
         self.X_act = np.zeros((self.dim_state, self.t.size))
         self.X_est = np.zeros((self.dim_state, self.t.size))
         self.X_act[:, 0] = np.array([start_pos[0], start_pos[1], vel[0], vel[1]]).reshape((self.dim_state,))
@@ -77,6 +83,8 @@ class Robot(Entity):
         self.Y_est.fill(np.nan)
         self.P = np.diag(np.array([1, 1, 0, 0]))
         self.error_bars = np.zeros((self.dim_state, self.t.size))
+        self.cost = self.P[0, 0]**2 + self.P[1, 1]**2
+        self.FoV_of_sensor = None
     
     def Dynamics(self, k_k):
         # Set up for 2 spatial dimensions ie. x, y

@@ -74,3 +74,12 @@ def PlotGraph(robots):
         
     print(outside, "/", total, "estimations are outside of the errorbars (Position est only)")
     return
+
+def PlotSensorTargets(sensors):
+    for k in range(len(sensors)):
+        plt.scatter(sensors[k].t, sensors[k].targets_over_time)
+    plt.title("Sensor Target vs. Time")
+    plt.ylabel("Robot Number")
+    plt.xlabel("Time")
+    plt.show()
+    return

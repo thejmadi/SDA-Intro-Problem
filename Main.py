@@ -35,7 +35,7 @@ def PropTest():
     
     # Initialize all sensor instance initial conditions
     sensor_position_1 = np.array([0, 0])
-    sensor_field_of_view_1 = np.array([[0, robots[0].l[0] / 2], [0, robots[0].l[1]]])
+    sensor_field_of_view_1 = np.array([[0, robots[0].l[0]/2], [0, robots[0].l[1]]])
     R_1 = np.diag(np.array([.25, .25]))
     
     # Create all instances of sensors
@@ -49,6 +49,7 @@ def PropTest():
     plot.PlotRoom(robots)
     # Plot robots' Est and Act States vs. Time and Plot est Error vs Time with error bars, 2 plots/robot
     plot.PlotGraph(robots)
+    plot.PlotSensorTargets(sensors)
     
 # Runs simulation specified number of times
 for k in range(1):
