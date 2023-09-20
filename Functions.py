@@ -7,7 +7,7 @@ Created on Mon Sep 11 18:47:08 2023
 
 # Working Version
 # Extra Functions
-# Includes Error bar calculations, Kalman Filter, will include sensor tasking functions next
+# Includes Error bar calculations, Kalman Filter, Sensor Tasking and OptimizationFunc based on random probability distribution.
 
 import sympy as sp
 import numpy as np
@@ -16,6 +16,16 @@ from numpy import linalg as la
 def ErrorBars(robot, k):
     robot.error_bars[:, k] = robot.sig_bounds * np.sqrt(np.diag(robot.P).astype(float))
     return
+
+def OptimizationFunc(num): # Takes in number of robots in sensor instance's FoV
+    probability = np.random.uniform(0, num)
+    choice_FoV_index = int(np.floor(probability))
+    return choice_FoV_index # Outputs index of robot (in in_FoV array) to keep track of
+
+def Tasking(in_FoV): # Takes in array of indexes of robots in sensor instance's FoV
+    num_in_FoV = len(in_FoV)
+    sensor_choice = in_FoV[OptimizationFunc(num_in_FoV)] # Index of robot to keep track of goes from index of in_FoV -> index of robots
+    return sensor_choice # Outputs index of robot (in robots array) to keep track of 
 
 def KF(robots, sensors):
     dim_state = robots[0].dim_state
@@ -45,14 +55,14 @@ def KF(robots, sensors):
             F.fill(0)
         
         # 2a. Check if all actual X's is in sensors FoV
-        # Currently prioritizes robot 2 to be targeted
         for i in range(num_sensors):
-            if sensors[i].InFoV(robots[1].X_act[:, k+1]):
-                sensors[i].SwitchTarget(robots[1])
-            elif sensors[i].InFoV(robots[0].X_act[:, k+1]):
-                sensors[i].SwitchTarget(robots[0])
-            else:
-                sensors[i].SwitchTarget(None)
+            sensors[i].robots_in_FoV.clear()
+            for j in range(num_robots):
+                if sensors[i].InFoV(robots[j].X_act[:, k+1]):
+                    sensors[i].robots_in_FoV.append(j);
+            if(len(sensors[i].robots_in_FoV) > 0):
+                robot_choice = Tasking(sensors[i].robots_in_FoV)
+                sensors[i].SwitchTarget(robots[robot_choice], k+1, robot_choice)
         
         # 2b. Update X, P of sensors' targets
         for i in range(num_sensors):
