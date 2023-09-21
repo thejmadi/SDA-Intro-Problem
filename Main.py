@@ -10,13 +10,17 @@ Created on Wed Sep 13 21:39:35 2023
 # Uses Functions.py to calc actual and estimated states of robots using Kalman Filter
 # Uses Plots.py to generate 
 
+
+import cProfile
+import pstats
+
 import numpy as np
-import timeit as time
 import Entities as ent
 import Functions as fc
 import Plots as plot
 
-def PropTest():
+def Main():
+    num_runs = 50
     # States in [r_x, r_y, v_x, v_y].T format
 
     # Initialize all robot instance initial conditions
@@ -42,15 +46,22 @@ def PropTest():
     sensors = [ent.Sensor(sensor_position_1, sensor_field_of_view_1, R_1)]
     
     # Call Kalman Filter
-    robots, sensors = fc.KF(robots, sensors)
+    robots, sensors = fc.MonteCarlo(robots, sensors, num_runs)
     
     # Call plots
     # Plot visualization of room with robots' positions and estimates, 1 plot
-    plot.PlotRoom(robots)
+    #plot.PlotRoom(robots)
     # Plot robots' Est and Act States vs. Time and Plot est Error vs Time with error bars, 2 plots/robot
-    plot.PlotGraph(robots)
-    plot.PlotSensorTargets(sensors)
+    #plot.PlotGraph(robots)
+    #plot.PlotSensorTargets(sensors)
     
 # Runs simulation specified number of times
-for k in range(1):
-    PropTest()
+#Main()
+run = cProfile.Profile()
+run.run("Main()")
+run.dump_stats("cProfile.prof")
+
+with open("cProfile.txt", "w") as txt:
+    stats = pstats.Stats("cProfile.prof", stream = txt)
+    stats.sort_stats("cumtime")
+    stats.print_stats()

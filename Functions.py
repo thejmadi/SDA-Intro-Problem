@@ -17,6 +17,10 @@ def ErrorBars(robot, k):
     robot.error_bars[:, k] = robot.sig_bounds * np.sqrt(np.diag(robot.P).astype(float))
     return
 
+def Cost(cov):
+    cost = (cov[0, 0]**2 + cov[1, 1]**2)
+    return cost
+
 def OptimizationFunc(num): # Takes in number of robots in sensor instance's FoV
     probability = np.random.uniform(0, num)
     choice_FoV_index = int(np.floor(probability))
@@ -33,6 +37,9 @@ def KF(robots, sensors):
     num_robots = len(robots)
     num_sensors = len(sensors)
     I = np.identity(dim_state)
+    J_run_t_n = np.zeros(num_robots)
+    J_run_t = np.zeros(robots[0].t.size)
+    J_run = 0
     
     for k in range(sensors[0].t.size - 1):
         # 1. Propagate
@@ -86,5 +93,30 @@ def KF(robots, sensors):
 
                 ErrorBars(sensors[i].target, k+1)
                 H.fill(0)
-                
-    return robots, sensors
+        
+        for i in range(num_robots):
+            J_run_t_n[i] = Cost(robots[i].P)
+        J_run_t[k] = np.sum(J_run_t_n)
+    
+    J_run = np.sum(J_run_t)
+    
+    return robots, sensors, J_run
+
+def MonteCarlo(robots, sensors, num_runs):
+    J_runs = np.zeros(num_runs)
+    
+    for k in range(num_runs):
+        robots, sensors, J_runs[k] = KF(robots, sensors)
+    
+    J = np.sum(J_runs) / num_runs
+    with open ("out.txt", "w") as out:
+        output = "Cost per run"
+        out.write(output)
+        out.write("\n")
+        out.write(str(J_runs))
+        out.write("\n")
+        output = "Average Cost for %i runs." % num_runs
+        out.write(output)
+        out.write("\n")
+        out.write(str(J))
+    return robots, sensors#, J
