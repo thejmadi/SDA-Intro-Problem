@@ -18,7 +18,7 @@ class Entity(object):
     dim_msmt = 2
     
     time_start = 0
-    time_end = 30
+    time_end = 50
     h = .1
     t = np.arange(time_start, time_end + h, h)
     
@@ -27,8 +27,7 @@ class Entity(object):
     
     sig_bounds = 3
     
-    robot_count = 0
-
+    
 class Sensor(Entity):
     def __init__(self, sensor_position, field_of_view, R_sensor):
         self.pos = sensor_position
@@ -70,8 +69,6 @@ class Sensor(Entity):
 
 class Robot(Entity):
     def __init__(self, vel, start_pos, Q_robot):
-        self.robot_count += 1
-        self.id = self.robot_count
         self.X_act = np.zeros((self.dim_state, self.t.size))
         self.X_est = np.zeros((self.dim_state, self.t.size))
         self.X_act[:, 0] = np.array([start_pos[0], start_pos[1], vel[0], vel[1]]).reshape((self.dim_state,))
@@ -83,8 +80,6 @@ class Robot(Entity):
         self.Y_est.fill(np.nan)
         self.P = np.diag(np.array([1, 1, 0, 0]))
         self.error_bars = np.zeros((self.dim_state, self.t.size))
-        self.cost = self.P[0, 0]**2 + self.P[1, 1]**2
-        self.FoV_of_sensor = None
     
     def Dynamics(self, k_k):
         # Set up for 2 spatial dimensions ie. x, y
