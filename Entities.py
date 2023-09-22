@@ -11,16 +11,22 @@ import sympy as sp
 import numpy as np
 from numpy import linalg as la
 
-# Create parent class of robots and sensors ie. the modeling environment
+# Create Environment Class and 3 children classes
+# Sensors, Robots, Optimization
+# Only 1 Optimization instance is needed
+
 class Entity(object):
     l = np.array([10, 10])                                                      # Length of room (x,y)
     dim_state = 4
     dim_msmt = 2
     
     time_start = 0
-    time_end = 50
+    time_end = 20
     h = .1
     t = np.arange(time_start, time_end + h, h)
+    
+    MC_runs = 20
+    output_file_name = "out.txt"
     
     G = h*np.identity(dim_state)
     M = np.identity(dim_msmt)
@@ -127,3 +133,48 @@ class Robot(Entity):
             X_k_prop[3] = abs(X_k_prop[3])
         
         return np.matrix(X_k_prop).astype(np.float64)
+
+class Optimization(Entity):
+    def __init__(self, num_robots):
+        self.J_runs_t_n = np.zeros(num_robots) # Cost per robot per timestep
+        self.J_runs_t = np.zeros(self.t.size) # Cost for all robots per timestep
+        self.J_runs = np.zeros(self.MC_runs) # Cost for all robots for all timesteps
+        self.J = 0 # Cost for all robots for all timesteps for all runs
+        
+    def Reset(self):
+        self.J_runs_t_n.fill(0)
+        self.J_runs_t.fill(0)
+    
+    def CostPerRobot(self, cov, i):
+        self.J_runs_t_n[i] = cov[0, 0] + cov[1, 1]
+    
+    def CostPerTimestep(self, k):
+        self.J_runs_t[k] = np.sum(self.J_runs_t_n)
+    
+    def CostPerRun(self, n):
+        self.J_runs[n] = np.sum(self.J_runs_t)
+    
+    def CostTotal(self):
+        self.J = np.sum(self.J_runs) / self.MC_runs
+    
+    def ToFile(self):
+        with open (self.output_file_name, "w") as out:
+            output = "Cost per run"
+            out.write(output)
+            out.write("\n")
+            out.write(str(self.J_runs))
+            out.write("\n")
+            output = "Average Cost for %i runs." % self.MC_runs
+            out.write(output)
+            out.write("\n")
+            out.write(str(self.J))
+    
+    def Policy(self, num_in_FoV): # Takes in number of robots in sensor instance's FoV
+        probability = np.random.uniform(0, num_in_FoV)
+        choice_FoV_index = int(np.floor(probability))
+        return choice_FoV_index # Outputs index of robot (in in_FoV array) to keep track of
+    
+    def Tasking(self, in_FoV): # Takes in array of indexes of robots in sensor instance's FoV
+        num_in_FoV = len(in_FoV)
+        sensor_choice = in_FoV[self.Policy(num_in_FoV)] # Index of robot to keep track of goes from index of in_FoV -> index of robots
+        return sensor_choice # Outputs index of robot (in robots array) to keep track of 

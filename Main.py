@@ -20,7 +20,6 @@ import Functions as fc
 import Plots as plot
 
 def Main():
-    num_runs = 50
     # States in [r_x, r_y, v_x, v_y].T format
 
     # Initialize all robot instance initial conditions
@@ -45,8 +44,11 @@ def Main():
     # Create all instances of sensors
     sensors = [ent.Sensor(sensor_position_1, sensor_field_of_view_1, R_1)]
     
+    # Create instance of Optimization
+    optimize = ent.Optimization(len(robots))
+    
     # Call Kalman Filter
-    robots, sensors = fc.MonteCarlo(robots, sensors, num_runs)
+    robots, sensors, optimize = fc.MonteCarlo(robots, sensors, optimize)
     
     # Call plots
     # Plot visualization of room with robots' positions and estimates, 1 plot
@@ -55,8 +57,6 @@ def Main():
     #plot.PlotGraph(robots)
     #plot.PlotSensorTargets(sensors)
     
-# Runs simulation specified number of times
-#Main()
 run = cProfile.Profile()
 run.run("Main()")
 run.dump_stats("cProfile.prof")

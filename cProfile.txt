@@ -1,0 +1,344 @@
+Fri Sep 22 17:58:09 2023    cProfile.prof
+
+         154432090 function calls (151731458 primitive calls) in 116.544 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000  116.544  116.544 {built-in method builtins.exec}
+        1    0.000    0.000  116.544  116.544 <string>:1(<module>)
+        1    0.000    0.000  116.544  116.544 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Main.py:22(Main)
+        1    0.000    0.000  116.543  116.543 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Functions.py:87(MonteCarlo)
+       20    0.480    0.024  116.542    5.827 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Functions.py:20(KF)
+    16000    0.547    0.000   96.218    0.006 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:101(Propagation)
+    80000    1.778    0.000   82.832    0.001 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:764(subs)
+2465481/1770268    3.699    0.000   55.295    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\cache.py:69(wrapper)
+611150/291137    1.040    0.000   48.097    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:957(_subs)
+4428931/4396931    4.397    0.000   42.459    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\sympify.py:92(sympify)
+367356/181964    1.395    0.000   41.169    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:1029(fallback)
+1063680/744000    6.260    0.000   34.502    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1031(__new__)
+  1564162   10.460    0.000   31.401    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:1867(_aresame)
+    24000    0.746    0.000   23.501    0.001 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:88(Dynamics)
+   384000    0.762    0.000   23.107    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:906(<listcomp>)
+   712824    0.928    0.000   21.118    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\decorators.py:254(_func)
+   351680    3.697    0.000   17.010    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\sympify.py:68(_convert_numpy_types)
+    93745    0.959    0.000   12.694    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\operations.py:46(__new__)
+     8000    0.274    0.000   11.105    0.001 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:57(Obs)
+  1122334    0.698    0.000    8.324    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:362(__ne__)
+  1326366    2.670    0.000    8.276    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\expr.py:143(__eq__)
+    31063    0.556    0.000    7.189    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\mul.py:178(flatten)
+  3139807    2.330    0.000    6.530    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\sympify.py:486(_sympify)
+  1497911    2.790    0.000    5.689    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1383(__eq__)
+   319680    0.919    0.000    5.422    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:1313(from_str)
+   123628    0.122    0.000    5.421    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\assumptions.py:452(getit)
+   712824    0.580    0.000    5.246    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\decorators.py:129(binary_op_wrapper)
+450354/276649    0.414    0.000    5.233    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\decorators.py:88(__sympifyit_wrapper)
+  1145805    1.635    0.000    5.214    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1191(_new)
+    62086    1.994    0.000    5.016    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\facts.py:499(deduce_all_facts)
+   256320    0.579    0.000    4.800    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\_print_helpers.py:27(__str__)
+  3584968    1.259    0.000    4.674    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:2045(__next__)
+ 22007599    4.212    0.000    4.342    0.000 {built-in method builtins.isinstance}
+  1867388    1.389    0.000    4.279    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1478(__hash__)
+   256320    0.253    0.000    4.221    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\printing\printer.py:372(__call__)
+   256320    0.279    0.000    3.968    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\printing\str.py:898(sstr)
+   448412    0.316    0.000    3.905    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\expr.py:227(__rmul__)
+843388/747388    0.980    0.000    3.891    0.000 {built-in method numpy.core._multiarray_umath.implement_array_function}
+  3584968    1.160    0.000    3.415    0.000 {built-in method builtins.next}
+    31043    0.075    0.000    3.252    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\assumptions.py:464(_ask)
+    62642    0.683    0.000    2.987    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\add.py:159(flatten)
+  1867388    1.238    0.000    2.887    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:807(__hash__)
+   718394    0.903    0.000    2.605    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\symbol.py:309(_hashable_content)
+   256320    0.218    0.000    2.591    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\printing\printer.py:289(doprint)
+  6066055    2.015    0.000    2.569    0.000 {built-in method builtins.getattr}
+  1957282    0.859    0.000    2.513    0.000 {built-in method builtins.all}
+6442903/5680577    1.921    0.000    2.501    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:2001(_preorder_traversal)
+  1225785    1.920    0.000    2.409    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:151(mpf_norm)
+   256320    1.971    0.000    2.373    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\printing\printer.py:293(_print)
+  3128324    1.630    0.000    2.368    0.000 <frozen importlib._bootstrap>:389(parent)
+   994565    1.276    0.000    2.333    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:291(from_man_exp)
+   214881    0.328    0.000    2.325    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:2157(__add__)
+4314666/4253144    1.747    0.000    2.312    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\expr.py:125(__hash__)
+   204032    0.267    0.000    2.303    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:699(_eval_subs)
+   957305    0.553    0.000    2.136    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:330(from_int)
+   159300    0.219    0.000    2.103    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:491(from_rational)
+    31043    0.030    0.000    2.048    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\assumptions.py:436(copy)
+    31043    0.103    0.000    2.019    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\assumptions.py:424(__init__)
+   319680    1.341    0.000    1.812    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:1290(str_to_man_exp)
+   393763    0.208    0.000    1.801    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1413(__ne__)
+    12000    0.368    0.000    1.784    0.000 {method 'multivariate_normal' of 'numpy.random.mtrand.RandomState' objects}
+  4904794    1.318    0.000    1.739    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\facts.py:533(<genexpr>)
+   134284    0.319    0.000    1.720    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1291(__add__)
+   142642    0.188    0.000    1.714    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1697(__add__)
+    64000    0.249    0.000    1.693    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1416(_Frel)
+  2653750    1.573    0.000    1.618    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:1997(__init__)
+   519680    0.814    0.000    1.612    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\sympify.py:58(_is_numpy_instance)
+    32000    0.530    0.000    1.452    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\symbol.py:555(symbols)
+   319680    0.250    0.000    1.393    0.000 <__array_function__ internals>:2(reshape)
+   204444    0.296    0.000    1.388    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1288(__neg__)
+  1176546    0.915    0.000    1.372    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:113(__new__)
+   718394    0.761    0.000    1.325    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\symbol.py:321(assumptions0)
+    32000    0.034    0.000    1.313    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1454(__ge__)
+   256320    0.634    0.000    1.284    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:207(_decimal_to_Rational_prec)
+   539701    1.278    0.000    1.278    0.000 {built-in method numpy.array}
+   168000    0.348    0.000    1.162    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:410(from_float)
+   256320    0.545    0.000    1.098    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\printing\printer.py:257(__init__)
+  1649401    1.090    0.000    1.090    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:153(_normalize)
+   319680    0.287    0.000    1.003    0.000 <__array_function__ internals>:2(size)
+   613465    0.413    0.000    0.943    0.000 {built-in method builtins.any}
+   350325    0.249    0.000    0.902    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:2074(_as_mpf_val)
+   319680    0.253    0.000    0.893    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:199(reshape)
+  4156342    0.869    0.000    0.869    0.000 {built-in method builtins.hasattr}
+   159300    0.406    0.000    0.852    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:950(mpf_div)
+    12000    0.015    0.000    0.847    0.000 <__array_function__ internals>:2(allclose)
+    12000    0.021    0.000    0.820    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\numeric.py:2121(allclose)
+  5055226    0.782    0.000    0.782    0.000 {method 'get' of 'dict' objects}
+    62365    0.144    0.000    0.767    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1305(__mul__)
+  3128324    0.738    0.000    0.738    0.000 {method 'rpartition' of 'str' objects}
+   173935    0.725    0.000    0.725    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\mul.py:1597(_eval_subs)
+   343681    0.185    0.000    0.717    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\_asarray.py:14(asarray)
+    12000    0.012    0.000    0.710    0.000 <__array_function__ internals>:2(isclose)
+   424320    0.401    0.000    0.703    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:64(dps_to_prec)
+    12000    0.084    0.000    0.683    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\numeric.py:2197(isclose)
+    24000    0.067    0.000    0.670    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\matrixlib\defmatrix.py:115(__new__)
+    31124    0.050    0.000    0.656    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:2198(__mul__)
+   327680    0.249    0.000    0.654    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:52(_wrapfunc)
+   705481    0.320    0.000    0.643    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libintmath.py:91(python_bitcount)
+   319680    0.556    0.000    0.626    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\getlimits.py:366(__new__)
+   264000    0.161    0.000    0.618    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\expr.py:202(__add__)
+   116000    0.202    0.000    0.603    0.000 {method 'astype' of 'numpy.ndarray' objects}
+    16000    0.021    0.000    0.586    0.000 <__array_function__ internals>:2(svd)
+   152000    0.168    0.000    0.565    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\symbol.py:261(__new__)
+  3395807    0.554    0.000    0.554    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\core.py:71(<lambda>)
+    31063    0.049    0.000    0.552    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1736(__mul__)
+  1432866    0.535    0.000    0.546    0.000 {built-in method __new__ of type object at 0x58678518}
+    16000    0.345    0.000    0.542    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\linalg\linalg.py:1483(svd)
+  1207360    0.467    0.000    0.467    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\sympify.py:64(<genexpr>)
+    32000    0.030    0.000    0.462    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1470(__le__)
+   256320    0.179    0.000    0.449    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:223(_literal_float)
+   256320    0.231    0.000    0.443    0.000 {method 'as_tuple' of 'decimal.Decimal' objects}
+   718394    0.443    0.000    0.443    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\symbol.py:323(<dictcomp>)
+    93705    0.289    0.000    0.443    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:1792(_exec_constructor_postprocessors)
+    80000    0.062    0.000    0.441    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:715(__add__)
+    94005    0.090    0.000    0.433    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:670(_as_mpf_op)
+1173834/1143073    0.334    0.000    0.432    0.000 {built-in method builtins.hash}
+   140724    0.226    0.000    0.426    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:702(mpf_add)
+  1148591    0.414    0.000    0.414    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\facts.py:482(_tell)
+   256320    0.282    0.000    0.400    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\printing\printer.py:249(_get_initial_settings)
+    24000    0.398    0.000    0.398    0.000 {built-in method _warnings.warn}
+  2653750    0.394    0.000    0.394    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:2048(__iter__)
+   359684    0.394    0.000    0.394    0.000 {method 'reshape' of 'numpy.ndarray' objects}
+  1453801    0.389    0.000    0.389    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:712(args)
+   361138    0.388    0.000    0.388    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:208(_normalize1)
+    80000    0.083    0.000    0.387    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:674(__float__)
+  1133612    0.378    0.000    0.380    0.000 {built-in method builtins.max}
+  2769077    0.379    0.000    0.379    0.000 {built-in method builtins.len}
+    20000    0.132    0.000    0.368    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Functions.py:16(ErrorBars)
+     4000    0.005    0.000    0.353    0.000 <__array_function__ internals>:2(pinv)
+  2141447    0.340    0.000    0.341    0.000 {method 'items' of 'dict' objects}
+     4000    0.101    0.000    0.340    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\linalg\linalg.py:1916(pinv)
+   705481    0.322    0.000    0.322    0.000 {built-in method _bisect.bisect_right}
+   152000    0.214    0.000    0.318    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\symbol.py:229(_sanitize)
+    12000    0.124    0.000    0.317    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\numeric.py:2274(within_tol)
+    36000    0.030    0.000    0.303    0.000 <__array_function__ internals>:2(all)
+    32000    0.031    0.000    0.271    0.000 <__array_function__ internals>:2(iscomplex)
+   718394    0.271    0.000    0.271    0.000 {built-in method builtins.sorted}
+   256320    0.270    0.000    0.270    0.000 {method 'match' of 're.Pattern' objects}
+    44023    0.083    0.000    0.269    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:70(_wrapreduction)
+    36000    0.037    0.000    0.243    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:2337(all)
+   798209    0.228    0.000    0.228    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1215(_hashable_content)
+   823380    0.222    0.000    0.222    0.000 {method 'split' of 'str' objects}
+    20005    0.020    0.000    0.217    0.000 <__array_function__ internals>:2(diag)
+    80000    0.051    0.000    0.217    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1236(_as_mpf_val)
+   187470    0.154    0.000    0.217    0.000 <frozen importlib._bootstrap>:1017(_handle_fromlist)
+   256320    0.124    0.000    0.212    0.000 <string>:1(__new__)
+   344864    0.138    0.000    0.189    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:2282(__hash__)
+   424320    0.187    0.000    0.187    0.000 {built-in method builtins.round}
+   639360    0.187    0.000    0.187    0.000 {method 'startswith' of 'str' objects}
+   126365    0.162    0.000    0.182    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:884(python_mpf_mul)
+    20005    0.040    0.000    0.177    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\lib\twodim_base.py:214(diag)
+   256320    0.131    0.000    0.175    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\printing\str.py:824(_print_Zero)
+    93705    0.114    0.000    0.173    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\operations.py:94(_from_args)
+   959040    0.170    0.000    0.170    0.000 {method 'lower' of 'str' objects}
+    32000    0.064    0.000    0.167    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\lib\type_check.py:210(iscomplex)
+    44023    0.155    0.000    0.155    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+   281235    0.102    0.000    0.144    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\operations.py:59(<genexpr>)
+    80000    0.083    0.000    0.137    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\compatibility.py:149(iterable)
+    24000    0.037    0.000    0.135    0.000 {method 'view' of 'numpy.ndarray' objects}
+    24002    0.056    0.000    0.134    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\_ufunc_config.py:32(seterr)
+   319680    0.131    0.000    0.131    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:3117(size)
+   110761    0.053    0.000    0.130    0.000 C:\Users\tarun\Documents\Anaconda\lib\abc.py:96(__instancecheck__)
+    96005    0.043    0.000    0.129    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\_asarray.py:86(asanyarray)
+   102644    0.056    0.000    0.127    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1242(_as_mpf_op)
+96000/72000    0.116    0.000    0.127    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\matrixlib\defmatrix.py:167(__array_finalize__)
+   155215    0.120    0.000    0.120    0.000 {method 'update' of 'set' objects}
+   639364    0.115    0.000    0.115    0.000 {method 'rstrip' of 'str' objects}
+    82850    0.114    0.000    0.114    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\symbol.py:313(_eval_subs)
+   281235    0.081    0.000    0.114    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\operations.py:63(<genexpr>)
+    20000    0.019    0.000    0.110    0.000 <__array_function__ internals>:2(diagonal)
+   352000    0.109    0.000    0.109    0.000 C:\Users\tarun\Documents\Anaconda\lib\inspect.py:487(getmro)
+    24000    0.022    0.000    0.109    0.000 <__array_function__ internals>:2(dot)
+    12001    0.017    0.000    0.100    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\_ufunc_config.py:433(__enter__)
+    64000    0.051    0.000    0.100    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:574(mpf_cmp)
+   204444    0.095    0.000    0.095    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:663(mpf_neg)
+    62126    0.074    0.000    0.094    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\mul.py:455(_gather)
+   503680    0.093    0.000    0.093    0.000 {method 'strip' of 'str' objects}
+    32000    0.027    0.000    0.092    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:641(mpf_ge)
+   159300    0.090    0.000    0.090    0.000 {built-in method builtins.divmod}
+   344397    0.084    0.000    0.089    0.000 {built-in method builtins.abs}
+   319680    0.088    0.000    0.088    0.000 {method 'replace' of 'str' objects}
+    80000    0.051    0.000    0.087    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:454(to_float)
+    32000    0.056    0.000    0.083    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\symbol.py:699(<listcomp>)
+   287364    0.083    0.000    0.083    0.000 {method 'copy' of 'dict' objects}
+   256321    0.081    0.000    0.081    0.000 {method 'update' of 'dict' objects}
+   110761    0.077    0.000    0.077    0.000 {built-in method _abc._abc_instancecheck}
+    62642    0.042    0.000    0.074    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\add.py:19(_addsort)
+    20000    0.027    0.000    0.073    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:1502(diagonal)
+    30761    0.053    0.000    0.069    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\mul.py:842(as_coeff_Mul)
+   319680    0.068    0.000    0.068    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:3113(_size_dispatcher)
+    12001    0.014    0.000    0.065    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\_ufunc_config.py:438(__exit__)
+   168000    0.064    0.000    0.064    0.000 {built-in method math.frexp}
+   319680    0.062    0.000    0.062    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:194(_reshape_dispatcher)
+    24000    0.046    0.000    0.061    0.000 {method 'copy' of 'numpy.ndarray' objects}
+    16000    0.036    0.000    0.061    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\linalg\linalg.py:135(_commonType)
+    32000    0.024    0.000    0.059    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:631(mpf_le)
+    93745    0.057    0.000    0.057    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\operations.py:78(<listcomp>)
+   256320    0.056    0.000    0.056    0.000 {method 'lstrip' of 'str' objects}
+   152000    0.055    0.000    0.055    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\logic.py:92(fuzzy_bool)
+   110571    0.055    0.000    0.055    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\add.py:873(_eval_subs)
+   310879    0.054    0.000    0.054    0.000 {method 'append' of 'list' objects}
+    61522    0.053    0.000    0.053    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:1806(<genexpr>)
+     4001    0.005    0.000    0.052    0.000 <__array_function__ internals>:2(amax)
+    24002    0.047    0.000    0.051    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\_ufunc_config.py:132(geterr)
+     4000    0.006    0.000    0.051    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:149(CostPerTimestep)
+    20000    0.022    0.000    0.049    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\linalg\linalg.py:107(_makearray)
+    61522    0.048    0.000    0.048    0.000 {method 'mro' of 'type' objects}
+   256320    0.048    0.000    0.048    0.000 {method 'is_finite' of 'decimal.Decimal' objects}
+    44040    0.045    0.000    0.045    0.000 {built-in method numpy.zeros}
+     4021    0.004    0.000    0.045    0.000 <__array_function__ internals>:2(sum)
+   220023    0.045    0.000    0.045    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\expr.py:134(_hashable_content)
+    93685    0.043    0.000    0.043    0.000 {method 'sort' of 'list' objects}
+     4001    0.007    0.000    0.042    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:2589(amax)
+     6440    0.005    0.000    0.039    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:797(mpf_sub)
+     8000    0.006    0.000    0.038    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\linalg\linalg.py:216(transpose)
+     4021    0.007    0.000    0.036    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:2105(sum)
+    32000    0.036    0.000    0.036    0.000 {method 'item' of 'numpy.generic' objects}
+    80000    0.036    0.000    0.036    0.000 {built-in method math.ldexp}
+     3090    0.004    0.000    0.035    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:175(Tasking)
+    96000    0.035    0.000    0.035    0.000 {method 'pop' of 'list' objects}
+   184000    0.035    0.000    0.035    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\symbol.py:700(<genexpr>)
+    31043    0.023    0.000    0.034    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\mul.py:29(_mulsort)
+     8000    0.007    0.000    0.032    0.000 <__array_function__ internals>:2(swapaxes)
+    12000    0.011    0.000    0.032    0.000 <__array_function__ internals>:2(result_type)
+     3090    0.010    0.000    0.031    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:170(Policy)
+   152000    0.030    0.000    0.030    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\symbol.py:685(literal)
+    31043    0.018    0.000    0.028    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\assumptions.py:439(generator)
+    20000    0.027    0.000    0.027    0.000 {method 'diagonal' of 'numpy.ndarray' objects}
+    63180    0.026    0.000    0.026    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1285(__bool__)
+    93685    0.026    0.000    0.026    0.000 {method 'insert' of 'list' objects}
+   152000    0.025    0.000    0.025    0.000 {method 'keys' of 'dict' objects}
+    32000    0.017    0.000    0.024    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\linalg\linalg.py:125(_realType)
+    95140    0.023    0.000    0.023    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\basic.py:686(func)
+      412    0.001    0.000    0.023    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\expr.py:217(__rsub__)
+    44023    0.022    0.000    0.022    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:71(<dictcomp>)
+    64000    0.022    0.000    0.022    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\logic\boolalg.py:435(<lambda>)
+   112000    0.022    0.000    0.022    0.000 {method 'pop' of 'dict' objects}
+     3090    0.021    0.000    0.021    0.000 {method 'uniform' of 'numpy.random.mtrand.RandomState' objects}
+    24002    0.019    0.000    0.019    0.000 {built-in method numpy.seterrobj}
+     8000    0.005    0.000    0.018    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:550(swapaxes)
+    32000    0.014    0.000    0.018    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\numeric.py:1816(isscalar)
+    32000    0.018    0.000    0.018    0.000 {method 'endswith' of 'str' objects}
+    80000    0.017    0.000    0.017    0.000 {built-in method builtins.iter}
+    32000    0.012    0.000    0.017    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\linalg\linalg.py:112(isComplexType)
+     8000    0.017    0.000    0.017    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:45(InFoV)
+    80004    0.016    0.000    0.016    0.000 {built-in method builtins.issubclass}
+    12044    0.014    0.000    0.014    0.000 {method 'fill' of 'numpy.ndarray' objects}
+    61522    0.014    0.000    0.014    0.000 {built-in method from_iterable}
+    31043    0.013    0.000    0.013    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1282(_eval_is_zero)
+    48004    0.012    0.000    0.012    0.000 {built-in method numpy.geterrobj}
+    63288    0.012    0.000    0.012    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\logic\boolalg.py:402(__bool__)
+    62126    0.012    0.000    0.012    0.000 {method 'extend' of 'list' objects}
+    31043    0.011    0.000    0.011    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\facts.py:479(__init__)
+    16000    0.011    0.000    0.011    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\linalg\linalg.py:102(get_linalg_error_extobj)
+    16000    0.011    0.000    0.011    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\linalg\linalg.py:194(_assert_stacked_2d)
+     8000    0.010    0.000    0.010    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:146(CostPerRobot)
+    32000    0.010    0.000    0.010    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:692(mpf_sign)
+    36000    0.008    0.000    0.008    0.000 {method '__array_prepare__' of 'numpy.ndarray' objects}
+    31063    0.008    0.000    0.008    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\mul.py:543(<listcomp>)
+    32000    0.007    0.000    0.007    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\lib\type_check.py:206(_is_type_dispatcher)
+    31063    0.007    0.000    0.007    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\mul.py:641(<listcomp>)
+    12001    0.007    0.000    0.007    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\_ufunc_config.py:429(__init__)
+    36000    0.007    0.000    0.007    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:2333(_all_dispatcher)
+    31063    0.007    0.000    0.007    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:2642(__bool__)
+    24000    0.006    0.000    0.006    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\multiarray.py:706(dot)
+     8000    0.005    0.000    0.005    0.000 {method 'swapaxes' of 'numpy.ndarray' objects}
+    20005    0.005    0.000    0.005    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\lib\twodim_base.py:210(_diag_dispatcher)
+      712    0.001    0.000    0.004    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1375(__abs__)
+    16000    0.004    0.000    0.004    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\linalg\linalg.py:1479(_svd_dispatcher)
+    20000    0.004    0.000    0.004    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:1498(_diagonal_dispatcher)
+     3090    0.004    0.000    0.004    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:53(SwitchTarget)
+    12000    0.003    0.000    0.003    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\numeric.py:2117(_allclose_dispatcher)
+    12000    0.002    0.000    0.002    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\multiarray.py:634(result_type)
+    12000    0.002    0.000    0.002    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\numeric.py:2193(_isclose_dispatcher)
+     4000    0.002    0.000    0.002    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\linalg\linalg.py:211(_is_empty_2d)
+     4000    0.002    0.000    0.002    0.000 {method 'conjugate' of 'numpy.ndarray' objects}
+     8000    0.002    0.000    0.002    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:546(_swapaxes_dispatcher)
+     4000    0.001    0.000    0.001    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\linalg\linalg.py:1912(_pinv_dispatcher)
+     4000    0.001    0.000    0.001    0.000 {method 'clear' of 'list' objects}
+     4001    0.001    0.000    0.001    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:2584(_amax_dispatcher)
+     4021    0.001    0.000    0.001    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:2100(_sum_dispatcher)
+        1    0.000    0.000    0.001    0.001 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:158(ToFile)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:1473(_array_str_implementation)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:516(array2string)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:461(wrapper)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:478(_array2string)
+      712    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\mpmath\libmp\libmpf.py:677(mpf_abs)
+        1    0.000    0.000    0.000    0.000 {built-in method io.open}
+       40    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:2243(__ne__)
+       40    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:2236(__eq__)
+       20    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\numeric.py:2084(identity)
+      712    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\logic\boolalg.py:334(__bool__)
+       20    0.000    0.000    0.000    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:152(CostPerRun)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:409(_get_format_function)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:709(_formatArray)
+     21/1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:718(recurser)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:366(<lambda>)
+       40    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:1862(__eq__)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:836(__init__)
+        2    0.000    0.000    0.000    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:75(__init__)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:863(fillFormat)
+       20    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\lib\twodim_base.py:152(eye)
+       20    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:947(__call__)
+       61    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\numbers.py:827(as_coeff_Mul)
+       40    0.000    0.000    0.000    0.000 {built-in method numpy.core._multiarray_umath.dragon4_positional}
+       21    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:918(<genexpr>)
+       21    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:913(<genexpr>)
+       20    0.000    0.000    0.000    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:142(Reset)
+       20    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:695(_extendLine)
+        7    0.000    0.000    0.000    0.000 {method 'write' of '_io.TextIOWrapper' objects}
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\_bootlocale.py:11(getpreferredencoding)
+        7    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\encodings\cp1252.py:18(encode)
+        1    0.000    0.000    0.000    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:36(__init__)
+        1    0.000    0.000    0.000    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:136(__init__)
+        1    0.000    0.000    0.000    0.000 D:\tarun\EDP\RobotProject\SDA-Intro-Problem\Entities.py:155(CostTotal)
+        1    0.000    0.000    0.000    0.000 <__array_function__ internals>:2(amin)
+       21    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:922(<genexpr>)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:60(_make_options_dict)
+       21    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:923(<genexpr>)
+        1    0.000    0.000    0.000    0.000 {built-in method _locale._getdefaultlocale}
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:2714(amin)
+       20    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\mul.py:675(<genexpr>)
+        7    0.000    0.000    0.000    0.000 {built-in method _codecs.charmap_encode}
+       20    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\sympy\core\mul.py:677(<genexpr>)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:358(_get_formatdict)
+        1    0.000    0.000    0.000    0.000 {built-in method builtins.locals}
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\codecs.py:186(__init__)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:65(<dictcomp>)
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\arrayprint.py:827(_none_or_positive_arg)
+        1    0.000    0.000    0.000    0.000 {method 'discard' of 'set' objects}
+        1    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}
+        1    0.000    0.000    0.000    0.000 C:\Users\tarun\Documents\Anaconda\lib\site-packages\numpy\core\fromnumeric.py:2709(_amin_dispatcher)
+        1    0.000    0.000    0.000    0.000 {built-in method _thread.get_ident}
+        1    0.000    0.000    0.000    0.000 {built-in method builtins.id}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
