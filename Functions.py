@@ -7,7 +7,7 @@ Created on Mon Sep 11 18:47:08 2023
 
 # Working Version
 # Extra Functions
-# Includes Error bar calculations, Kalman Filter, Sensor Tasking and OptimizationFunc based on random probability distribution.
+# Includes Error bar calculations, Kalman Filter, MonteCarlo
 
 import sympy as sp
 import numpy as np
@@ -17,29 +17,12 @@ def ErrorBars(robot, k):
     robot.error_bars[:, k] = robot.sig_bounds * np.sqrt(np.diag(robot.P).astype(float))
     return
 
-def Cost(cov):
-    cost = (cov[0, 0]**2 + cov[1, 1]**2)
-    return cost
-
-def OptimizationFunc(num): # Takes in number of robots in sensor instance's FoV
-    probability = np.random.uniform(0, num)
-    choice_FoV_index = int(np.floor(probability))
-    return choice_FoV_index # Outputs index of robot (in in_FoV array) to keep track of
-
-def Tasking(in_FoV): # Takes in array of indexes of robots in sensor instance's FoV
-    num_in_FoV = len(in_FoV)
-    sensor_choice = in_FoV[OptimizationFunc(num_in_FoV)] # Index of robot to keep track of goes from index of in_FoV -> index of robots
-    return sensor_choice # Outputs index of robot (in robots array) to keep track of 
-
-def KF(robots, sensors):
+def KF(robots, sensors, optimize):
     dim_state = robots[0].dim_state
     dim_msmt = robots[0].dim_msmt
     num_robots = len(robots)
     num_sensors = len(sensors)
     I = np.identity(dim_state)
-    J_run_t_n = np.zeros(num_robots)
-    J_run_t = np.zeros(robots[0].t.size)
-    J_run = 0
     
     for k in range(sensors[0].t.size - 1):
         # 1. Propagate
@@ -68,7 +51,7 @@ def KF(robots, sensors):
                 if sensors[i].InFoV(robots[j].X_act[:, k+1]):
                     sensors[i].robots_in_FoV.append(j);
             if(len(sensors[i].robots_in_FoV) > 0):
-                robot_choice = Tasking(sensors[i].robots_in_FoV)
+                robot_choice = optimize.Tasking(sensors[i].robots_in_FoV)
                 sensors[i].SwitchTarget(robots[robot_choice], k+1, robot_choice)
         
         # 2b. Update X, P of sensors' targets
@@ -94,29 +77,21 @@ def KF(robots, sensors):
                 ErrorBars(sensors[i].target, k+1)
                 H.fill(0)
         
+        # Compute CostPerRobot and CostPerTimestep
         for i in range(num_robots):
-            J_run_t_n[i] = Cost(robots[i].P)
-        J_run_t[k] = np.sum(J_run_t_n)
-    
-    J_run = np.sum(J_run_t)
-    
-    return robots, sensors, J_run
+            optimize.CostPerRobot(robots[i].P, i)
+        optimize.CostPerTimestep(k)
 
-def MonteCarlo(robots, sensors, num_runs):
-    J_runs = np.zeros(num_runs)
+    return robots, sensors, optimize
+
+def MonteCarlo(robots, sensors, optimize):
     
-    for k in range(num_runs):
-        robots, sensors, J_runs[k] = KF(robots, sensors)
+    for n in range(optimize.MC_runs):
+        robots, sensors, optimize = KF(robots, sensors, optimize)
+        optimize.CostPerRun(n)
+        optimize.Reset()
     
-    J = np.sum(J_runs) / num_runs
-    with open ("out.txt", "w") as out:
-        output = "Cost per run"
-        out.write(output)
-        out.write("\n")
-        out.write(str(J_runs))
-        out.write("\n")
-        output = "Average Cost for %i runs." % num_runs
-        out.write(output)
-        out.write("\n")
-        out.write(str(J))
-    return robots, sensors#, J
+    optimize.CostTotal()
+    optimize.ToFile()
+    
+    return robots, sensors, optimize
