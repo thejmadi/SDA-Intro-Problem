@@ -33,8 +33,11 @@ def Main():
     Q_2 = np.diag(np.array([0.25, 0.25, 0, 0]))
     
     # Create all instances of robots
-    robots = [ent.Robot(V_1, start_position_1, Q_1),
-              ent.Robot(V_2, start_position_2, Q_2)]
+    robots = []
+    
+    for k in range(2):
+        robots.append(ent.Robot(V_1, start_position_1, Q_1))
+        robots.append(ent.Robot(V_2, start_position_2, Q_2))
     
     # Initialize all sensor instance initial conditions
     sensor_position_1 = np.array([0, 0])
@@ -42,7 +45,10 @@ def Main():
     R_1 = np.diag(np.array([.25, .25]))
     
     # Create all instances of sensors
-    sensors = [ent.Sensor(sensor_position_1, sensor_field_of_view_1, R_1)]
+    sensors = []
+    
+    for k in range(1):
+        sensors.append(ent.Sensor(sensor_position_1, sensor_field_of_view_1, R_1))
     
     # Create instance of Optimization
     optimize = ent.Optimization(len(robots))
