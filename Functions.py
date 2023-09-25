@@ -87,6 +87,7 @@ def KF(robots, sensors, optimize):
 def MonteCarlo(robots, sensors, optimize):
     
     for n in range(optimize.MC_runs):
+        print(n)
         robots, sensors, optimize = KF(robots, sensors, optimize)
         optimize.CostPerRun(n)
         optimize.Reset()
