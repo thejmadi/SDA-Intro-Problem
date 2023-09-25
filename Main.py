@@ -20,6 +20,9 @@ import Functions as fc
 import Plots as plot
 
 def Main():
+    num_call_MC = 3
+    J_optimized = np.zeros(num_call_MC)
+    
     # States in [r_x, r_y, v_x, v_y].T format
 
     # Initialize all robot instance initial conditions
@@ -35,7 +38,7 @@ def Main():
     # Create all instances of robots
     robots = []
     
-    for k in range(2):
+    for k in range(1):
         robots.append(ent.Robot(V_1, start_position_1, Q_1))
         robots.append(ent.Robot(V_2, start_position_2, Q_2))
     
@@ -54,9 +57,12 @@ def Main():
     optimize = ent.Optimization(len(robots))
     
     # Call Kalman Filter
-    robots, sensors, optimize = fc.MonteCarlo(robots, sensors, optimize)
+    for k in range(num_call_MC):
+        robots, sensors, optimize = fc.MonteCarlo(robots, sensors, optimize)
+        J_optimized[k] = optimize.J
     
     # Call plots
+    plot.OptimizedCost(J_optimized)
     # Plot visualization of room with robots' positions and estimates, 1 plot
     #plot.PlotRoom(robots)
     # Plot robots' Est and Act States vs. Time and Plot est Error vs Time with error bars, 2 plots/robot

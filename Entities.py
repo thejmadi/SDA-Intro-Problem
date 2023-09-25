@@ -15,13 +15,13 @@ from numpy import linalg as la
 # Sensors, Robots, Optimization
 # Only 1 Optimization instance is needed
 
-class Entity(object):
+class Environment(object):
     l = np.array([10, 10])                                                      # Length of room (x,y)
     dim_state = 4
     dim_msmt = 2
     
     time_start = 0
-    time_end = 20
+    time_end = 1
     h = .1
     t = np.arange(time_start, time_end + h, h)
     
@@ -34,7 +34,7 @@ class Entity(object):
     sig_bounds = 3
     
     
-class Sensor(Entity):
+class Sensor(Environment):
     def __init__(self, sensor_position, field_of_view, R_sensor):
         self.pos = sensor_position
         self.FoV = field_of_view
@@ -73,7 +73,7 @@ class Sensor(Entity):
             
         return np.matrix(obs).astype(np.float64), H
 
-class Robot(Entity):
+class Robot(Environment):
     def __init__(self, vel, start_pos, Q_robot):
         self.X_act = np.zeros((self.dim_state, self.t.size))
         self.X_est = np.zeros((self.dim_state, self.t.size))
@@ -134,7 +134,7 @@ class Robot(Entity):
         
         return np.matrix(X_k_prop).astype(np.float64)
 
-class Optimization(Entity):
+class Optimization(Environment):
     def __init__(self, num_robots):
         self.J_runs_t_n = np.zeros(num_robots) # Cost per robot per timestep
         self.J_runs_t = np.zeros(self.t.size) # Cost for all robots per timestep
