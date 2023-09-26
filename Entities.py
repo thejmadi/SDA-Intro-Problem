@@ -25,7 +25,7 @@ class Environment(object):
     h = .1
     t = np.arange(time_start, time_end + h, h)
     
-    MC_runs = 20
+    MC_runs = 25
     output_file_name = "out.txt"
     
     G = h*np.identity(dim_state)
@@ -33,14 +33,26 @@ class Environment(object):
     
     sig_bounds = 3
     
+    # Robot Parameters, Shown for 2 robots
+    vel = np.array([[2, 1], [1, 2]])
+    start_pos = np.array([[5, 0], [0, 5]])
+    Q_robot = np.array([[0.25, 0.25, 0, 0], [0.25, 0.25, 0, 0]])
+    
+    # Sensor Parameters, Shown for 1 sensor
+    sensor_position = np.array([[0, 0], [0, 0]])
+    field_of_view = np.array([[0, l[0]/2, 0, l[1]], [0, l[0]/2, 0, l[1]]])
+    R_sensor = np.array([[.25, .25], [0.25, 0.25]])
     
 class Sensor(Environment):
-    def __init__(self, sensor_position, field_of_view, R_sensor):
-        self.pos = sensor_position
-        self.FoV = field_of_view
+    def __init__(self, sensor_choice):
+        self.Reset(sensor_choice)
+    
+    def Reset(self, sensor_choice):
+        self.pos = self.sensor_position[sensor_choice]
+        self.FoV = self.field_of_view[sensor_choice].reshape((self.dim_msmt, self.dim_msmt))
         self.target = None
         self.targets_over_time = np.zeros(self.t.size)
-        self.v = (0, R_sensor)
+        self.v = (0, np.diag(self.R_sensor[sensor_choice]))
         self.K = np.zeros((self.dim_state, self.dim_state))
         self.robots_in_FoV = []
     
@@ -74,12 +86,16 @@ class Sensor(Environment):
         return np.matrix(obs).astype(np.float64), H
 
 class Robot(Environment):
-    def __init__(self, vel, start_pos, Q_robot):
+    
+    def __init__(self, robot_choice):
+        self.Reset(robot_choice)
+    
+    def Reset(self, robot_choice):
         self.X_act = np.zeros((self.dim_state, self.t.size))
         self.X_est = np.zeros((self.dim_state, self.t.size))
-        self.X_act[:, 0] = np.array([start_pos[0], start_pos[1], vel[0], vel[1]]).reshape((self.dim_state,))
-        self.X_est[:, 0] = np.array([start_pos[0], start_pos[1], vel[0], vel[1]]).reshape((self.dim_state,))
-        self.w = (0, Q_robot / self.h)
+        self.X_act[:, 0] = np.array([self.start_pos[robot_choice, 0], self.start_pos[robot_choice, 1], self.vel[robot_choice, 0], self.vel[robot_choice, 1]]).reshape((self.dim_state,))
+        self.X_est[:, 0] = np.array([self.start_pos[robot_choice, 0], self.start_pos[robot_choice, 1], self.vel[robot_choice, 0], self.vel[robot_choice, 1]]).reshape((self.dim_state,))
+        self.w = (0, np.diag(self.Q_robot[robot_choice]) / self.h)
         self.Y_act = np.zeros((self.dim_msmt, self.t.size))
         self.Y_act.fill(np.nan)
         self.Y_est = np.zeros((self.dim_msmt, self.t.size))
@@ -141,9 +157,13 @@ class Optimization(Environment):
         self.J_runs = np.zeros(self.MC_runs) # Cost for all robots for all timesteps
         self.J = 0 # Cost for all robots for all timesteps for all runs
         
-    def Reset(self):
+    def Reset1(self):
         self.J_runs_t_n.fill(0)
         self.J_runs_t.fill(0)
+    
+    def Reset2(self):
+        self.J_runs.fill(0)
+        self.J = 0
     
     def CostPerRobot(self, cov, i):
         self.J_runs_t_n[i] = cov[0, 0] + cov[1, 1]

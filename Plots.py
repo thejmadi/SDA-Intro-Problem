@@ -83,3 +83,10 @@ def PlotSensorTargets(sensors):
     plt.xlabel("Time")
     plt.show()
     return
+
+def OptimizedCost(J):
+    runs = np.arange(0, J.shape[0], 1)
+    plt.plot(runs, J)
+    plt.title("Optimized Cost vs Runs")
+    plt.xlabel("Runs")
+    plt.ylabel("Optimized Cost")

@@ -6,7 +6,7 @@ Created on Wed Sep 13 21:39:35 2023
 """
 
 # Working Version
-# Uses Entities.py to generate room with n robots and m sensors
+# Uses Entities.py to generate room with n robots and m sensors and 1 optimize instance
 # Uses Functions.py to calc actual and estimated states of robots using Kalman Filter
 # Uses Plots.py to generate 
 
@@ -20,46 +20,13 @@ import Functions as fc
 import Plots as plot
 
 def Main():
-    num_call_MC = 3
-    J_optimized = np.zeros(num_call_MC)
+    num_runs = 20
+    J_optimized = np.zeros(num_runs)
     
     # States in [r_x, r_y, v_x, v_y].T format
-
-    # Initialize all robot instance initial conditions
-    
-    V_1 = np.array([2, 1])
-    start_position_1 = np.array([5, 0])
-    Q_1 = np.diag(np.array([0.25, 0.25, 0, 0]))
-    
-    V_2 = np.array([1, 2])
-    start_position_2 = np.array([0, 5])
-    Q_2 = np.diag(np.array([0.25, 0.25, 0, 0]))
-    
-    # Create all instances of robots
-    robots = []
-    
-    for k in range(1):
-        robots.append(ent.Robot(V_1, start_position_1, Q_1))
-        robots.append(ent.Robot(V_2, start_position_2, Q_2))
-    
-    # Initialize all sensor instance initial conditions
-    sensor_position_1 = np.array([0, 0])
-    sensor_field_of_view_1 = np.array([[0, robots[0].l[0]/2], [0, robots[0].l[1]]])
-    R_1 = np.diag(np.array([.25, .25]))
-    
-    # Create all instances of sensors
-    sensors = []
-    
-    for k in range(1):
-        sensors.append(ent.Sensor(sensor_position_1, sensor_field_of_view_1, R_1))
-    
-    # Create instance of Optimization
-    optimize = ent.Optimization(len(robots))
     
     # Call Kalman Filter
-    for k in range(num_call_MC):
-        robots, sensors, optimize = fc.MonteCarlo(robots, sensors, optimize)
-        J_optimized[k] = optimize.J
+    J_optimized = fc.MonteCarlo(num_runs)
     
     # Call plots
     plot.OptimizedCost(J_optimized)
