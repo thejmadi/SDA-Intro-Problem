@@ -7,15 +7,23 @@ Created on Mon Sep 11 18:47:08 2023
 
 # Working Version
 # Extra Functions
-# Includes Error bar calculations, Kalman Filter, MonteCarlo
+# Includes Error bar calculations, reset instances of robots/sensors, Kalman Filter, MonteCarlo
 
 import sympy as sp
 import numpy as np
 from numpy import linalg as la
+import Entities as ent
 
 def ErrorBars(robot, k):
     robot.error_bars[:, k] = robot.sig_bounds * np.sqrt(np.diag(robot.P).astype(float))
     return
+
+def ResetInstances(robots, sensors):
+    for k in range(int(len(robots)/2)):
+        robots[k].Reset(k)
+        robots[k].Reset(k+1)
+    for k in range(len(sensors)):
+        sensors[k].Reset(k)
 
 def KF(robots, sensors, optimize):
     dim_state = robots[0].dim_state
@@ -84,15 +92,33 @@ def KF(robots, sensors, optimize):
 
     return robots, sensors, optimize
 
-def MonteCarlo(robots, sensors, optimize):
+def MonteCarlo(num_runs):
+    J_optimized = np.zeros(num_runs)
+    robots = []
     
-    for n in range(optimize.MC_runs):
-        print(n)
-        robots, sensors, optimize = KF(robots, sensors, optimize)
-        optimize.CostPerRun(n)
-        optimize.Reset()
+    for k in range(1):
+        robots.append(ent.Robot(k))
+        robots.append(ent.Robot(k+1))
+
+    sensors = []
     
-    optimize.CostTotal()
-    optimize.ToFile()
+    for k in range(1):
+        sensors.append(ent.Sensor(k))
     
-    return robots, sensors, optimize
+    optimize = ent.Optimization(len(robots))
+    
+    for r in range(num_runs):
+        for n in range(optimize.MC_runs):
+            print(n)
+            robots, sensors, optimize = KF(robots, sensors, optimize)
+            optimize.CostPerRun(n)
+            optimize.Reset1()
+            ResetInstances(robots, sensors)
+    
+        optimize.CostTotal()
+        optimize.ToFile()
+        
+        J_optimized[r] = optimize.J
+        optimize.Reset2()
+    
+    return J_optimized
