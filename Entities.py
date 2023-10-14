@@ -21,11 +21,11 @@ class Environment(object):
     dim_msmt = 2
     
     time_start = 0
-    time_end = 1
-    h = .1
+    time_end = 5
+    h = .5
     t = np.arange(time_start, time_end + h, h)
     
-    MC_runs = 25
+    MC_runs = 1
     output_file_name = "out.txt"
     
     G = h*np.identity(dim_state)
@@ -38,10 +38,10 @@ class Environment(object):
     start_pos = np.array([[5, 0], [0, 5]])
     Q_robot = np.array([[0.25, 0.25, 0, 0], [0.25, 0.25, 0, 0]])
     
-    # Sensor Parameters, Shown for 1 sensor
+    # Sensor Parameters, Shown for 2 sensor, Only using first 1
     sensor_position = np.array([[0, 0], [0, 0]])
     field_of_view = np.array([[0, l[0]/2, 0, l[1]], [0, l[0]/2, 0, l[1]]])
-    R_sensor = np.array([[.25, .25], [0.25, 0.25]])
+    R_sensor = np.array([[0.25, 0.25], [0.25, 0.25]])
     
 class Sensor(Environment):
     def __init__(self, sensor_choice):
@@ -177,6 +177,7 @@ class Optimization(Environment):
     def CostTotal(self):
         self.J = np.sum(self.J_runs) / self.MC_runs
     
+    # Write Cost info to output file
     def ToFile(self):
         with open (self.output_file_name, "w") as out:
             output = "Cost per run"

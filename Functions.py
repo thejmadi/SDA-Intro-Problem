@@ -13,6 +13,7 @@ import sympy as sp
 import numpy as np
 from numpy import linalg as la
 import Entities as ent
+import Plots as plot
 
 def ErrorBars(robot, k):
     robot.error_bars[:, k] = robot.sig_bounds * np.sqrt(np.diag(robot.P).astype(float))
@@ -21,7 +22,7 @@ def ErrorBars(robot, k):
 def ResetInstances(robots, sensors):
     for k in range(int(len(robots)/2)):
         robots[k].Reset(k)
-        robots[k].Reset(k+1)
+        robots[k+1].Reset(k+1)
     for k in range(len(sensors)):
         sensors[k].Reset(k)
 
@@ -96,25 +97,36 @@ def MonteCarlo(num_runs):
     J_optimized = np.zeros(num_runs)
     robots = []
     
+    # Create Instances of robots, 1 of type 1, 1 of type 2
     for k in range(1):
         robots.append(ent.Robot(k))
         robots.append(ent.Robot(k+1))
 
     sensors = []
-    
+
+    # Create Instances of sensors, 1 of type 1
     for k in range(1):
         sensors.append(ent.Sensor(k))
     
+    # Create Instance of Optimization()
     optimize = ent.Optimization(len(robots))
     
+    # Run Monte Carlo (num_runs * MC_runs) times
     for r in range(num_runs):
         for n in range(optimize.MC_runs):
-            print(n)
+            # Call Kalman Filter Function
             robots, sensors, optimize = KF(robots, sensors, optimize)
+            # Plot graphs
+            plot.PlotRoom(robots)
+            plot.PlotGraph(robots)
+            plot.PlotSensorTargets(sensors)
+            # Calc cost per run
             optimize.CostPerRun(n)
+            # Reset optimize, robots, sensors
             optimize.Reset1()
             ResetInstances(robots, sensors)
     
+        # Calc Total Cost for 1 Monte Carlo batch
         optimize.CostTotal()
         optimize.ToFile()
         
