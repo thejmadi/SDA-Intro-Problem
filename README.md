@@ -4,29 +4,33 @@ Space Domain Awareness Intro problem, deals with multi-target tracking, Kalman F
 
 Files Included:
 
-Entities - Houses entity, sensor, and robot classes.
+Entities - Houses environment, sensor, robot, and optimize classes.
 
-Functions - Houses KF and Errorbar functions.
+Functions - Houses KF, Errorbar, ResetInstances, and MonteCarlo functions.
 
 Plots - Houses state estimation plots and enviroment visualization.
 
-Main - Runs simulations and calls other files.
+Main - Runs simulations and calls other files. Outputs cProfile data to text file.
 
 
 Currently:
 
-Creates robots and sensor instances.
+Creates robots, sensor, and optimize instances.
 
 Calculates estimated and actual state and covariance of robots.
 
-Sensors can be set to prioritize a certain robot.
+Sensors tasked based on uniform probability choice for each robot in field of view.
 
 Plots necessary graphs.
+
+Runs a batch of Monte Carlo simulations.
 
 
 Up next:
 
-Task sensor by minimizing a cost function. 
+Add in multiprocessing for Monte Carlo simulations. 
+
+Optimize tasking method using a gradient descent method over batches of Monte Carlo sims.
 
 
 Assumptions:
