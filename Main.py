@@ -20,7 +20,7 @@ import Functions as fc
 import Plots as plot
 
 def Main():
-    num_runs = 20
+    num_runs = 1
     J_optimized = np.zeros(num_runs)
     
     # States in [r_x, r_y, v_x, v_y].T format
@@ -29,13 +29,9 @@ def Main():
     J_optimized = fc.MonteCarlo(num_runs)
     
     # Call plots
-    plot.OptimizedCost(J_optimized)
-    # Plot visualization of room with robots' positions and estimates, 1 plot
-    #plot.PlotRoom(robots)
-    # Plot robots' Est and Act States vs. Time and Plot est Error vs Time with error bars, 2 plots/robot
-    #plot.PlotGraph(robots)
-    #plot.PlotSensorTargets(sensors)
+    #plot.OptimizedCost(J_optimized)
     
+# Create cProfile Data
 run = cProfile.Profile()
 run.run("Main()")
 run.dump_stats("cProfile.prof")
