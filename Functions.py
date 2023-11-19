@@ -128,7 +128,7 @@ def MonteCarlo(num_runs):
     
     # Create Instance of Optimization()
     optimize = ent.Optimization(len(robots))
-    J_runs = np.zeros(optimize.MC_runs)
+    #J_runs = np.zeros(optimize.MC_runs)
     
     # Run Monte Carlo (num_runs * MC_runs) times
     for r in range(num_runs):
@@ -146,10 +146,12 @@ def MonteCarlo(num_runs):
             optimize.Reset1()
             ResetInstances(robots, sensors)
         '''
+        #multi_results = []
         with mlt.Pool(6) as pool:
-            for n in range(optimize.MC_runs):
-                J_runs[n] = pool.apply_async(Task, args=(robots, sensors, optimize)).get()
-                print(n)
+            multi_results = [pool.apply_async(Task, args=(robots, sensors, optimize)) for n in range(optimize.MC_runs)]
+            J_runs = [r.get() for r in multi_results]
+            #print(n)
+        #J_try = []
         '''
         # Calc Total Cost for 1 Monte Carlo batch
         optimize.CostTotal()
@@ -159,6 +161,6 @@ def MonteCarlo(num_runs):
         optimize.Reset2()
         '''
         print(J_runs)
-        J[r] = np.sum(J_runs)/J_runs.shape[0]
+        J[r] = np.sum(J_runs)/optimize.MC_runs
     print(J)
     return J

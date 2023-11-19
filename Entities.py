@@ -25,7 +25,7 @@ class Environment(object):
     h = .5
     t = np.arange(time_start, time_end + h, h)
     
-    MC_runs = 5
+    MC_runs = 60
     output_file_name = "out.txt"
     
     G = h*np.identity(dim_state)
