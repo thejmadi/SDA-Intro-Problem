@@ -14,6 +14,8 @@ import numpy as np
 from numpy import linalg as la
 import Entities as ent
 import Plots as plot
+import multiprocessing as mlt
+#import sys
 
 def ErrorBars(robot, k):
     robot.error_bars[:, k] = robot.sig_bounds * np.sqrt(np.diag(robot.P).astype(float))
@@ -91,10 +93,26 @@ def KF(robots, sensors, optimize):
             optimize.CostPerRobot(robots[i].P, i)
         optimize.CostPerTimestep(k)
 
-    return robots, sensors, optimize
+    return robots, sensors, optimize, 
+
+def Task(robots, sensors, optimize):
+    KF(robots, sensors, optimize)
+    print('here')
+    #sys.stdout.flush()
+    plot.PlotRoom(robots)
+    plot.PlotGraph(robots)
+    plot.PlotSensorTargets(sensors)
+    # Calc cost per run
+    optimize.CostPerRun()
+    '''
+    # Reset optimize, robots, sensors
+    optimize.Reset1()
+    ResetInstances(robots, sensors)
+    '''
+    return optimize.J_runs
 
 def MonteCarlo(num_runs):
-    J_optimized = np.zeros(num_runs)
+    J = np.zeros(num_runs)
     robots = []
     
     # Create Instances of robots, 1 of type 1, 1 of type 2
@@ -110,9 +128,11 @@ def MonteCarlo(num_runs):
     
     # Create Instance of Optimization()
     optimize = ent.Optimization(len(robots))
+    J_runs = np.zeros(optimize.MC_runs)
     
     # Run Monte Carlo (num_runs * MC_runs) times
     for r in range(num_runs):
+        '''
         for n in range(optimize.MC_runs):
             # Call Kalman Filter Function
             robots, sensors, optimize = KF(robots, sensors, optimize)
@@ -125,12 +145,20 @@ def MonteCarlo(num_runs):
             # Reset optimize, robots, sensors
             optimize.Reset1()
             ResetInstances(robots, sensors)
-    
+        '''
+        with mlt.Pool(6) as pool:
+            for n in range(optimize.MC_runs):
+                J_runs[n] = pool.apply_async(Task, args=(robots, sensors, optimize)).get()
+                print(n)
+        '''
         # Calc Total Cost for 1 Monte Carlo batch
         optimize.CostTotal()
         optimize.ToFile()
         
         J_optimized[r] = optimize.J
         optimize.Reset2()
-    
-    return J_optimized
+        '''
+        print(J_runs)
+        J[r] = np.sum(J_runs)/J_runs.shape[0]
+    print(J)
+    return J

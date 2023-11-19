@@ -19,8 +19,8 @@ import Entities as ent
 import Functions as fc
 import Plots as plot
 
-def Main():
-    num_runs = 1
+if __name__ == '__main__':
+    num_runs = 5
     J_optimized = np.zeros(num_runs)
     
     # States in [r_x, r_y, v_x, v_y].T format
@@ -30,7 +30,7 @@ def Main():
     
     # Call plots
     #plot.OptimizedCost(J_optimized)
-    
+'''  
 # Create cProfile Data
 run = cProfile.Profile()
 run.run("Main()")
@@ -40,3 +40,4 @@ with open("cProfile.txt", "w") as txt:
     stats = pstats.Stats("cProfile.prof", stream = txt)
     stats.sort_stats("cumtime")
     stats.print_stats()
+'''

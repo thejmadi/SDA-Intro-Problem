@@ -25,7 +25,7 @@ class Environment(object):
     h = .5
     t = np.arange(time_start, time_end + h, h)
     
-    MC_runs = 1
+    MC_runs = 5
     output_file_name = "out.txt"
     
     G = h*np.identity(dim_state)
@@ -154,7 +154,8 @@ class Optimization(Environment):
     def __init__(self, num_robots):
         self.J_runs_t_n = np.zeros(num_robots) # Cost per robot per timestep
         self.J_runs_t = np.zeros(self.t.size) # Cost for all robots per timestep
-        self.J_runs = np.zeros(self.MC_runs) # Cost for all robots for all timesteps
+        #self.J_runs = np.zeros(self.MC_runs) # Cost for all robots for all timesteps
+        self.J_runs = 0
         self.J = 0 # Cost for all robots for all timesteps for all runs
         
     def Reset1(self):
@@ -171,8 +172,9 @@ class Optimization(Environment):
     def CostPerTimestep(self, k):
         self.J_runs_t[k] = np.sum(self.J_runs_t_n)
     
-    def CostPerRun(self, n):
-        self.J_runs[n] = np.sum(self.J_runs_t)
+    def CostPerRun(self):
+        #self.J_runs[n] = np.sum(self.J_runs_t)
+        self.J_runs = np.sum(self.J_runs_t)
     
     def CostTotal(self):
         self.J = np.sum(self.J_runs) / self.MC_runs
