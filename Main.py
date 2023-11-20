@@ -20,7 +20,7 @@ import Functions as fc
 import Plots as plot
 
 if __name__ == '__main__':
-    num_runs = 5
+    num_runs = 2
     J_optimized = np.zeros(num_runs)
     
     # States in [r_x, r_y, v_x, v_y].T format
