@@ -10,6 +10,7 @@ Created on Wed Sep 13 21:33:21 2023
 import sympy as sp
 import numpy as np
 from numpy import linalg as la
+import itertools as it
 
 # Create Environment Class and 3 children classes
 # Sensors, Robots, Optimization
@@ -37,11 +38,15 @@ class Environment(object):
     vel = np.array([[2, 1], [1, 2]])
     start_pos = np.array([[5, 0], [0, 5]])
     Q_robot = np.array([[0.25, 0.25, 0, 0], [0.25, 0.25, 0, 0]])
+    number_robots = 2;
     
     # Sensor Parameters, Shown for 2 sensor, Only using first 1
     sensor_position = np.array([[0, 0], [0, 0]])
     field_of_view = np.array([[0, l[0]/2, 0, l[1]], [0, l[0]/2, 0, l[1]]])
     R_sensor = np.array([[0.25, 0.25], [0.25, 0.25]])
+    number_sensors = 1;
+    
+    current_policy = np.ones((number_robots, t.shape[0]))/number_robots
     
 class Sensor(Environment):
     def __init__(self, sensor_choice):
@@ -55,7 +60,7 @@ class Sensor(Environment):
         self.v = (0, np.diag(self.R_sensor[sensor_choice]))
         self.K = np.zeros((self.dim_state, self.dim_state))
         self.robots_in_FoV = []
-    
+
     def InFoV(self, X):
         # Must always be called before Obs() is called
         
@@ -87,8 +92,11 @@ class Sensor(Environment):
 
 class Robot(Environment):
     
+    id_it = it.count()
+    
     def __init__(self, robot_choice):
         self.Reset(robot_choice)
+        self.id = next(self.id_it)
     
     def Reset(self, robot_choice):
         self.X_act = np.zeros((self.dim_state, self.t.size))
@@ -154,8 +162,8 @@ class Optimization(Environment):
     def __init__(self, num_robots):
         self.J_runs_t_n = np.zeros(num_robots) # Cost per robot per timestep
         self.J_runs_t = np.zeros(self.t.size) # Cost for all robots per timestep
-        #self.J_runs = np.zeros(self.MC_runs) # Cost for all robots for all timesteps
-        self.J_runs = 0
+        self.J_runs = np.zeros(self.MC_runs) # Cost for all robots for all timesteps
+        self.multi_J_runs = 0
         self.J = 0 # Cost for all robots for all timesteps for all runs
         
     def Reset1(self):
@@ -172,9 +180,11 @@ class Optimization(Environment):
     def CostPerTimestep(self, k):
         self.J_runs_t[k] = np.sum(self.J_runs_t_n)
     
-    def CostPerRun(self):
-        #self.J_runs[n] = np.sum(self.J_runs_t)
-        self.J_runs = np.sum(self.J_runs_t)
+    def CostPerRun(self, n):
+        self.J_runs[n] = np.sum(self.J_runs_t)
+    
+    def MultiCostPerRun(self):
+        self.multi_J_runs = np.sum(self.J_runs_t)
     
     def CostTotal(self):
         self.J = np.sum(self.J_runs) / self.MC_runs
@@ -191,13 +201,14 @@ class Optimization(Environment):
             out.write(output)
             out.write("\n")
             out.write(str(self.J))
-    
-    def Policy(self, num_in_FoV): # Takes in number of robots in sensor instance's FoV
-        probability = np.random.uniform(0, num_in_FoV)
-        choice_FoV_index = int(np.floor(probability))
-        return choice_FoV_index # Outputs index of robot (in in_FoV array) to keep track of
-    
-    def Tasking(self, in_FoV): # Takes in array of indexes of robots in sensor instance's FoV
-        num_in_FoV = len(in_FoV)
-        sensor_choice = in_FoV[self.Policy(num_in_FoV)] # Index of robot to keep track of goes from index of in_FoV -> index of robots
+
+    def Tasking(self, t): 
+        rand_num = np.random.random()
+        sensor_choice = None
+        prev = 0
+        for curr in range(0, self.number_robots):
+            if(prev <= rand_num < prev + self.current_policy[curr, t]):
+                sensor_choice = curr - 1
+                break
+            prev += self.current_policy[curr, t]
         return sensor_choice # Outputs index of robot (in robots array) to keep track of 
