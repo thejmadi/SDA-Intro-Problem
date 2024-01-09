@@ -14,6 +14,8 @@ import numpy as np
 from numpy import linalg as la
 import Entities as ent
 import Plots as plot
+import multiprocessing as mlt
+#import sys
 
 def ErrorBars(robot, k):
     robot.error_bars[:, k] = robot.sig_bounds * np.sqrt(np.diag(robot.P).astype(float))
@@ -55,13 +57,11 @@ def KF(robots, sensors, optimize):
         
         # 2a. Check if all actual X's is in sensors FoV
         for i in range(num_sensors):
-            sensors[i].robots_in_FoV.clear()
-            for j in range(num_robots):
-                if sensors[i].InFoV(robots[j].X_act[:, k+1]):
-                    sensors[i].robots_in_FoV.append(j);
-            if(len(sensors[i].robots_in_FoV) > 0):
-                robot_choice = optimize.Tasking(sensors[i].robots_in_FoV)
+            robot_choice = optimize.Tasking(k)
+            if sensors[i].InFoV(robots[robot_choice].X_act[:, k+1]):
                 sensors[i].SwitchTarget(robots[robot_choice], k+1, robot_choice)
+            else:
+                sensors[i].SwitchTarget(None, k+1, float("NaN"))
         
         # 2b. Update X, P of sensors' targets
         for i in range(num_sensors):
@@ -91,46 +91,97 @@ def KF(robots, sensors, optimize):
             optimize.CostPerRobot(robots[i].P, i)
         optimize.CostPerTimestep(k)
 
-    return robots, sensors, optimize
+    return robots, sensors, optimize, 
+
+def MultiTask(robots, sensors, optimize):
+    KF(robots, sensors, optimize)
+    # Calc cost per run
+    optimize.MultiCostPerRun()
+
+    ''' Don't think I need to reset anymore with multiprocessing
+    # Reset optimize, robots, sensors
+    optimize.Reset1()
+    ResetInstances(robots, sensors)
+    '''
+
+    return optimize.multi_J_runs
 
 def MonteCarlo(num_runs):
-    J_optimized = np.zeros(num_runs)
+    J = np.zeros(num_runs)
     robots = []
     
     # Create Instances of robots, 1 of type 1, 1 of type 2
     for k in range(1):
         robots.append(ent.Robot(k))
         robots.append(ent.Robot(k+1))
+    robots[0].number_robots = len(robots)
 
     sensors = []
 
     # Create Instances of sensors, 1 of type 1
     for k in range(1):
         sensors.append(ent.Sensor(k))
+    sensors[0].number_sensors = len(sensors)
     
     # Create Instance of Optimization()
     optimize = ent.Optimization(len(robots))
+    J_runs = np.zeros(optimize.MC_runs)
     
     # Run Monte Carlo (num_runs * MC_runs) times
     for r in range(num_runs):
         for n in range(optimize.MC_runs):
             # Call Kalman Filter Function
             robots, sensors, optimize = KF(robots, sensors, optimize)
+            
             # Plot graphs
-            plot.PlotRoom(robots)
-            plot.PlotGraph(robots)
-            plot.PlotSensorTargets(sensors)
+            #plot.PlotRoom(robots)
+            #plot.PlotGraph(robots)
+            #plot.PlotSensorTargets(sensors)
+            
             # Calc cost per run
             optimize.CostPerRun(n)
+            
             # Reset optimize, robots, sensors
             optimize.Reset1()
             ResetInstances(robots, sensors)
-    
+        
         # Calc Total Cost for 1 Monte Carlo batch
         optimize.CostTotal()
-        optimize.ToFile()
-        
-        J_optimized[r] = optimize.J
+        #optimize.ToFile()
+
+        J[r] = optimize.J
         optimize.Reset2()
+        
+    print(J)
+    return J
+
+# Uses Multiprocessing
+def MultiMonteCarlo(num_runs):
+    J = np.zeros(num_runs)
+    robots = []
     
-    return J_optimized
+    # Create Instances of robots, 1 of type 1, 1 of type 2
+    for k in range(1):
+        robots.append(ent.Robot(k))
+        robots.append(ent.Robot(k+1))
+    robots[0].number_robots = len(robots)
+
+    sensors = []
+
+    # Create Instances of sensors, 1 of type 1
+    for k in range(1):
+        sensors.append(ent.Sensor(k))
+    sensors[0].number_sensors = len(sensors)
+    
+    # Create Instance of Optimization()
+    optimize = ent.Optimization(len(robots))
+    
+    # Run Monte Carlo (num_runs * MC_runs) times
+    for r in range(num_runs):
+        with mlt.Pool(6) as pool:
+            multi_results = [pool.apply_async(MultiTask, args=(robots, sensors, optimize)) for n in range(optimize.MC_runs)]
+            J_runs = [r.get() for r in multi_results]
+        J[r] = np.sum(J_runs)/optimize.MC_runs
+        
+    print(J)
+    return J
