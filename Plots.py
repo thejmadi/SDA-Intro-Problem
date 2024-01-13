@@ -14,17 +14,32 @@ import matplotlib.pyplot as plt
 plt.rcParams['figure.dpi'] = 300
 
 def PlotRoom(robots):
-    
-    # Plot visualization of room with robots' positions and estimates
     colors = ["blue", "green", "yellow"]
     plt.axvline(0, c='black', zorder=0)
     plt.axvline(robots[0].l[0], c='black', zorder=0)
+    plt.axvspan(0, 5, ymin=1/7, ymax=6/7, alpha=0.3, color='gray', label='Sensor FoV')
     plt.axhline(0, c='black', zorder=0)
     plt.axhline(robots[0].l[1], c='black', zorder=0)
     for i in range(len(robots)):
         plt.scatter(robots[i].X_act[0, :], robots[i].X_act[1, :], c = colors[i], s = 40, label='Robot %i act' % (i+1))
-        plt.scatter(robots[i].X_est[0, :], robots[i].X_est[1, :], c = 'r', s = 6, label = "Robot est")
+        #plt.scatter(robots[i].X_est[0, :], robots[i].X_est[1, :], c = 'r', s = 6, label = "Robot est")
     plt.legend(loc="best")
+    plt.title("Room Plot")
+    plt.xlim(0 - 2, robots[0].l[0] + 2)
+    plt.ylim(0 - 2, robots[0].l[1] + 2)
+    plt.show()
+    # Plot visualization of room with robots' positions and estimates
+    #colors = ["blue", "green", "yellow"]
+    plt.axvline(0, c='black', zorder=0)
+    plt.axvline(robots[0].l[0], c='black', zorder=0)
+    plt.axvspan(0, 5, ymin=1/7, ymax=6/7, alpha=0.3, color='gray', label='Sensor FoV')
+    plt.axhline(0, c='black', zorder=0)
+    plt.axhline(robots[0].l[1], c='black', zorder=0)
+    for i in range(len(robots)):
+        plt.scatter(robots[i].X_act[0, :], robots[i].X_act[1, :], c = colors[i], s = 40, label='Robot %i act' % (i+1))
+        plt.scatter(robots[i].X_est[0, :], robots[i].X_est[1, :], c = 'r', s = 6, label = "Robot %i est" % (i+1))
+    plt.legend(loc="best")
+    plt.title("Room Plot with Estimations")
     plt.xlim(0 - 2, robots[0].l[0] + 2)
     plt.ylim(0 - 2, robots[0].l[1] + 2)
     plt.show()
@@ -32,7 +47,7 @@ def PlotRoom(robots):
 
 def PlotGraph(robots):
     colors = ["blue", "green", "yellow"]
-    plots = ["r_x", "r_y", "v_x", "v_y"]
+    plots = ["x Position", "y Position", "x Velocity", "y Velocity"]
     
     # Plot robots' Est and Act States vs. Time
     for k in range(len(robots)):
@@ -80,16 +95,16 @@ def PlotGraph(robots):
 
 def PlotSensorTargets(sensors):
     for k in range(len(sensors)):
-        plt.scatter(sensors[k].t, sensors[k].targets_over_time)
+        plt.scatter(sensors[k].t, sensors[k].targets_over_time + np.ones(sensors[k].t.shape[0]))
     plt.title("Sensor Target vs. Time")
     plt.ylabel("Robot Number")
     plt.xlabel("Time")
     plt.show()
     return
 
-def OptimizedCost(J):
-    runs = np.arange(0, J.shape[0], 1)
-    plt.plot(runs, J)
-    plt.title("Optimized Cost vs Runs")
-    plt.xlabel("Runs")
-    plt.ylabel("Optimized Cost")
+def OptimizedCost(runs, J):
+    runs_arr = np.arange(0+1, runs+1, 1)
+    plt.scatter(runs_arr, J)
+    plt.title("Cost vs Iteration")
+    plt.xlabel("Iteration Number")
+    plt.ylabel("Cost")
