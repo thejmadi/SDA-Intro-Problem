@@ -20,16 +20,16 @@ import Functions as fc
 import Plots as plot
 
 if __name__ == '__main__':
-    num_runs = 4
+    num_runs = 100
     J_optimized = np.zeros(num_runs)
     
     # States in [r_x, r_y, v_x, v_y].T format
     
     # Call Kalman Filter
-    J_optimized = fc.MultiMonteCarlo(num_runs)
+    J_optimized = fc.MonteCarlo(num_runs)
     
     # Call plots
-    #plot.OptimizedCost(J_optimized)
+    plot.OptimizedCost(num_runs, J_optimized)
 '''  
 # Create cProfile Data
 run = cProfile.Profile()

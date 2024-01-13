@@ -22,11 +22,11 @@ class Environment(object):
     dim_msmt = 2
     
     time_start = 0
-    time_end = 5
+    time_end = 1.5
     h = .5
     t = np.arange(time_start, time_end + h, h)
     
-    MC_runs = 60
+    MC_runs = 200
     output_file_name = "out.txt"
     
     G = h*np.identity(dim_state)
@@ -46,7 +46,16 @@ class Environment(object):
     R_sensor = np.array([[0.25, 0.25], [0.25, 0.25]])
     number_sensors = 1;
     
-    current_policy = np.ones((number_robots, t.shape[0]))/number_robots
+    # Policy index 0 is index 1 in t array (After 1 timestep)
+    current_policy = np.ones((number_robots, t.shape[0] - 1))/number_robots
+    #current_policy = np.array([[0, 1, 0],
+    #                          [1, 0, 1]])
+    optimal_policy = np.zeros((current_policy.shape))
+    min_cost = 100000
+    min_iter = 0
+    perturb_const_up = 0.1
+    perturb_const_low = 0.09
+    learn_rate = 0.002
     
 class Sensor(Environment):
     def __init__(self, sensor_choice):
@@ -160,11 +169,12 @@ class Robot(Environment):
 
 class Optimization(Environment):
     def __init__(self, num_robots):
-        self.J_runs_t_n = np.zeros(num_robots) # Cost per robot per timestep
+        self.J_runs_t_n = np.zeros(self.number_robots) # Cost per robot per timestep
         self.J_runs_t = np.zeros(self.t.size) # Cost for all robots per timestep
         self.J_runs = np.zeros(self.MC_runs) # Cost for all robots for all timesteps
-        self.multi_J_runs = 0
+        self.multi_J_runs = 0 # Cost for all robots for all timesteps (Multiprocessing)
         self.J = 0 # Cost for all robots for all timesteps for all runs
+        self.perturbed_policy = np.zeros(self.current_policy.shape)
         
     def Reset1(self):
         self.J_runs_t_n.fill(0)
@@ -174,7 +184,11 @@ class Optimization(Environment):
         self.J_runs.fill(0)
         self.J = 0
     
+    def Reset3(self):
+        self.perturbed_policy.fill(0)
+    
     def CostPerRobot(self, cov, i):
+        # Should be Tr(cov), does not include velocity parts currently
         self.J_runs_t_n[i] = cov[0, 0] + cov[1, 1]
     
     def CostPerTimestep(self, k):
@@ -202,13 +216,99 @@ class Optimization(Environment):
             out.write("\n")
             out.write(str(self.J))
 
-    def Tasking(self, t): 
+    # Tasks each sensor at every timestep (timestep t, bool is_unperturbed)
+    def Tasking(self, t, is_perturbed):
         rand_num = np.random.random()
-        sensor_choice = None
+        sensor_choice = 0
         prev = 0
-        for curr in range(0, self.number_robots):
-            if(prev <= rand_num < prev + self.current_policy[curr, t]):
-                sensor_choice = curr - 1
-                break
-            prev += self.current_policy[curr, t]
+        if not is_perturbed: # If policy is unperturbed
+            for curr in range(0, self.number_robots):
+                if(prev <= rand_num < prev + self.current_policy[curr, t]): # If rand_num inbetween interval described by adjacent policy elements (in col)
+                    sensor_choice = curr
+                    break
+                prev += self.current_policy[curr, t]
+        else: # If policy is perturbed
+            for curr in range(0, self.number_robots):
+                if(prev <= rand_num < prev + self.perturbed_policy[curr, t]):
+                    sensor_choice = curr
+                    break
+                prev += self.perturbed_policy[curr, t]
         return sensor_choice # Outputs index of robot (in robots array) to keep track of 
+    
+    '''
+    def PerturbPolicy(self, ):
+        for col in range(0, self.current_policy.shape[1]):
+            for row in range(0, self.current_policy.shape[0]):
+                perturb_bounds = self.perturb_const * self.current_policy[row, col] # Gives bounds for each policy perturbation element
+                self.perturbed_policy[row, col] = np.random.uniform(-perturb_bounds, perturb_bounds) # Generates random perturbation in given interval
+            self.perturbed_policy[:, col] = (self.perturbed_policy[:, col] + self.current_policy[:, col]) * (1/np.sum(self.perturbed_policy[:, col] + self.current_policy[:, col])) # Adds perturbation to current policy and enforces sum(col) = 1
+    '''
+    '''
+    def PerturbPolicy(self, ):
+        min_val = np.min(self.current_policy, axis=1)
+        for col in range(0, self.current_policy.shape[1]):
+            
+            #min_val = np.min(self.current_policy[:, col]) # New
+            
+            print("Column #", col)
+            for row in range(0, self.current_policy.shape[0]):
+                #perturb_bounds_up = self.perturb_const_up * self.current_policy[row, col] # Gives bounds for each policy perturbation element
+                #perturb_bounds_low = self.perturb_const_low * self.current_policy[row, col]
+                perturb_bounds_low = self.perturb_const_low * min_val[row] # New
+                perturb_bounds_up = self.perturb_const_up * min_val[row] # New
+                
+                self.perturbed_policy[row, col] = np.random.uniform(perturb_bounds_low, perturb_bounds_up) # Generates random perturbation in given interval
+                #print(perturb_bounds_low, self.perturbed_policy[row, col], perturb_bounds_up, perturb_bounds_low <= self.perturbed_policy[row, col] <= perturb_bounds_up)
+                self.perturbed_policy[row, col] *= np.random.choice([-1, 1])
+            print("Unnormalized Perturbation Policy:")
+            print(self.perturbed_policy[:, col] + self.current_policy[:, col])
+            self.perturbed_policy[:, col] = (self.perturbed_policy[:, col] + self.current_policy[:, col]) * (1/np.sum(self.perturbed_policy[:, col] + self.current_policy[:, col])) # Adds perturbation to current policy and enforces sum(col) = 1
+            print("Normalized Perturbation Policy:")
+            print(self.perturbed_policy[:, col])
+    '''
+    '''
+    def PerturbPolicy(self, ):
+        #min_val = np.min(self.current_policy, axis=1) # Prev 3/4
+        min_val = np.min(self.current_policy, axis=0) # Prev 5
+        for col in range(0, self.current_policy.shape[1]):
+            #min_val = np.min(self.current_policy[:, col]) # Prev 2
+            pos_neg = np.random.choice([-1, 1]) # Prev 4/5
+            #print("Column #", col)
+            for row in range(0, self.current_policy.shape[0], 2):
+                #perturb_bounds_up = self.perturb_const_up * self.current_policy[row, col] # Gives bounds for each policy perturbation element
+                #perturb_bounds_low = self.perturb_const_low * self.current_policy[row, col]
+                perturb_bounds_low = self.perturb_const_low * min_val[col]
+                perturb_bounds_up = self.perturb_const_up * min_val[col]
+                
+                self.perturbed_policy[row, col] = np.random.uniform(perturb_bounds_low, perturb_bounds_up) # Generates random perturbation in given interval
+                #print(perturb_bounds_low, self.perturbed_policy[row, col], perturb_bounds_up, perturb_bounds_low <= self.perturbed_policy[row, col] <= perturb_bounds_up)
+                self.perturbed_policy[row, col] *= pos_neg # Prev 4/5
+                pos_neg *= -1
+            #print("Unnormalized Perturbation Policy:")
+            #print(self.perturbed_policy[:, col] + self.current_policy[:, col])
+            self.perturbed_policy[:, col] = (self.perturbed_policy[:, col] + self.current_policy[:, col]) * (1/np.sum(self.perturbed_policy[:, col] + self.current_policy[:, col])) # Adds perturbation to current policy and enforces sum(col) = 1
+            #print("Normalized Perturbation Policy:")
+            #print(self.perturbed_policy[:, col])
+    '''
+    def PerturbPolicy(self, ):
+        #min_val = np.min(self.current_policy, axis=1) # Prev 3/4
+        min_val = np.min(self.current_policy, axis=0) # Prev 5
+        for col in range(0, self.current_policy.shape[1]):
+            #min_val = np.min(self.current_policy[:, col]) # Prev 2
+            pos_neg = np.random.choice([-1, 1]) # Prev 4/5
+            #print("Column #", col)
+            perturb_bounds_low = self.perturb_const_low * min_val[col]
+            perturb_bounds_up = self.perturb_const_up * min_val[col]
+            random = np.random.uniform(perturb_bounds_low, perturb_bounds_up)
+            #self.perturbed_policy[row, col] = np.random.uniform(perturb_bounds_low, perturb_bounds_up) # Generates random perturbation in given interval
+            self.perturbed_policy[:1, col] = pos_neg * random # Prev 4/5
+            pos_neg *= -1
+            self.perturbed_policy[1:, col] = pos_neg * random
+        self.perturbed_policy += self.current_policy
+            #print("Unnormalized Perturbation Policy:")
+            #print(self.perturbed_policy[:, col] + self.current_policy[:, col])
+            #self.perturbed_policy[:, col] = (self.perturbed_policy[:, col] + self.current_policy[:, col]) * (1/np.sum(self.perturbed_policy[:, col] + self.current_policy[:, col])) # Adds perturbation to current policy and enforces sum(col) = 1
+            #print("Normalized Perturbation Policy:")
+            #print(self.perturbed_policy[:, col])
+    
+ 
