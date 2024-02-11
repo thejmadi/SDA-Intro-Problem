@@ -22,11 +22,11 @@ class Environment(object):
     dim_msmt = 2
     
     time_start = 0
-    time_end = 1.5
-    h = .5
+    time_end = 3
+    h = .2
     t = np.arange(time_start, time_end + h, h)
     
-    MC_runs = 200
+    MC_runs = 100
     output_file_name = "out.txt"
     
     G = h*np.identity(dim_state)
@@ -44,7 +44,7 @@ class Environment(object):
     sensor_position = np.array([[0, 0], [0, 0]])
     field_of_view = np.array([[0, l[0]/2, 0, l[1]], [0, l[0]/2, 0, l[1]]])
     R_sensor = np.array([[0.25, 0.25], [0.25, 0.25]])
-    number_sensors = 1;
+    number_sensors = 1
     
     # Policy index 0 is index 1 in t array (After 1 timestep)
     current_policy = np.ones((number_robots, t.shape[0] - 1))/number_robots
@@ -56,6 +56,15 @@ class Environment(object):
     perturb_const_up = 0.1
     perturb_const_low = 0.09
     learn_rate = 0.002
+    
+    seed = 98765
+    
+    #sets_dyn = set()
+    #sets_obs = set()
+    #sets_task = set()
+    #arr_dyn = []
+    #arr_obs = []
+    #arr_task = []
     
 class Sensor(Environment):
     def __init__(self, sensor_choice):
@@ -82,7 +91,7 @@ class Sensor(Environment):
         self.target = new_target
         self.targets_over_time[k] = robot_id+1
         
-    def Obs(self, X, is_act):
+    def Obs(self, X, is_act, is_multi, rng):
         # Will need to change when sensor position changes
         r_x, r_y, v_x, v_y = sp.symbols("r_x, r_y, v_x, v_y")
         X_k = np.array([[r_x], [r_y], [v_x], [v_y]])
@@ -94,8 +103,18 @@ class Sensor(Environment):
         for i in range(self.dim_msmt):
             obs[i] = obs[i].subs([(r_x, X[0]), (r_y, X[1]), (v_x, X[2]), (v_y, X[3])])
             
-        if is_act == True:
-            obs += self.M @ np.random.multivariate_normal(np.zeros(self.dim_msmt),self.v[1])
+        if is_act == True and is_multi == True:
+            rand = rng.multivariate_normal(np.zeros(self.dim_msmt),self.v[1])
+            #for n in range(2):
+            #    self.sets_obs.add(rand[n])
+            #    self.arr_obs.append(rand[n])
+            #print("Obs", rand)
+            obs += self.M @ rand
+            
+        # Random for single process
+        #elif is_act == True and is_multi == False:
+        #    obs += self.M @ np.random.multivariate_normal(np.zeros(self.dim_msmt),self.v[1])
+
             
         return np.matrix(obs).astype(np.float64), H
 
@@ -133,15 +152,26 @@ class Robot(Environment):
         
         return X_k_prop, np.array(F).astype(np.float64), r_x, r_y, v_x, v_y, k
         
-    def Propagation(self, X_k, k_k, is_act):
+    def Propagation(self, X_k, k_k, is_act, is_multi, rng):
         X_k_prop, _, r_x, r_y, v_x, v_y, k = self.Dynamics(k_k)
         
         for i in range(self.dim_state):
             X_k_prop[i] = X_k_prop[i].subs([(r_x, X_k[0]), (r_y, X_k[1]), (v_x, X_k[2]), (v_y, X_k[3]), (k, k_k)])
         
-        if is_act == True:
-            X_k_prop += self.G @ np.random.multivariate_normal(np.zeros(self.dim_state),self.w[1])
-
+        if is_act == True and is_multi == True:
+            #X_k_prop += self.G @ rng.multivariate_normal(np.zeros(self.dim_state),self.w[1])
+            rand = rng.multivariate_normal(np.zeros(self.dim_state),self.w[1])
+            #for n in range(4):
+            #    self.sets_dyn.add(rand[n])
+            #    self.arr_dyn.append(rand[n])
+            #print("Dyn", rand)
+            X_k_prop += self.G @ rand
+        
+        # Random for single process
+        #elif is_act == True and is_multi == False:
+        #    X_k_prop += self.G @ np.random.multivariate_normal(np.zeros(self.dim_state),self.w[1])
+        
+        
         # If propagation causes robot to leave boundary x = l[0], x = 0, y = l[0], y = 0 respectively
         # Reflects robot back into bounds and flips V as needed
         
@@ -217,8 +247,17 @@ class Optimization(Environment):
             out.write(str(self.J))
 
     # Tasks each sensor at every timestep (timestep t, bool is_unperturbed)
-    def Tasking(self, t, is_perturbed):
-        rand_num = np.random.random()
+    def Tasking(self, t, is_perturbed, is_multi, rng):
+        if is_multi == True:
+            rand_num = rng.random()
+        #    self.sets_task.add(rand_num)
+        #    self.arr_task.append(rand_num)
+            #print("Task", rand_num)
+        # Random for single Process
+        #elif is_multi == False:
+        #    rand_num = np.random.random()
+            
+            
         sensor_choice = 0
         prev = 0
         if not is_perturbed: # If policy is unperturbed
@@ -290,25 +329,32 @@ class Optimization(Environment):
             #print("Normalized Perturbation Policy:")
             #print(self.perturbed_policy[:, col])
     '''
-    def PerturbPolicy(self, ):
-        #min_val = np.min(self.current_policy, axis=1) # Prev 3/4
-        min_val = np.min(self.current_policy, axis=0) # Prev 5
+    def PerturbPolicy(self, is_multi, rng):
+        min_val = np.min(self.current_policy, axis=0)
         for col in range(0, self.current_policy.shape[1]):
-            #min_val = np.min(self.current_policy[:, col]) # Prev 2
-            pos_neg = np.random.choice([-1, 1]) # Prev 4/5
-            #print("Column #", col)
             perturb_bounds_low = self.perturb_const_low * min_val[col]
             perturb_bounds_up = self.perturb_const_up * min_val[col]
-            random = np.random.uniform(perturb_bounds_low, perturb_bounds_up)
-            #self.perturbed_policy[row, col] = np.random.uniform(perturb_bounds_low, perturb_bounds_up) # Generates random perturbation in given interval
-            self.perturbed_policy[:1, col] = pos_neg * random # Prev 4/5
+            
+            if is_multi == True:
+                pos_neg = rng.choice([-1, 1])
+                perturb_mag = rng.uniform(perturb_bounds_low, perturb_bounds_up)
+            
+            # Random for single Process
+            #elif is_multi == False:
+            #    pos_neg = np.random.choice([-1, 1])
+            #    perturb_mag = np.random.uniform(perturb_bounds_low, perturb_bounds_up)
+            
+            self.perturbed_policy[:1, col] = pos_neg * perturb_mag
             pos_neg *= -1
-            self.perturbed_policy[1:, col] = pos_neg * random
+            self.perturbed_policy[1:, col] = pos_neg * perturb_mag
         self.perturbed_policy += self.current_policy
-            #print("Unnormalized Perturbation Policy:")
-            #print(self.perturbed_policy[:, col] + self.current_policy[:, col])
-            #self.perturbed_policy[:, col] = (self.perturbed_policy[:, col] + self.current_policy[:, col]) * (1/np.sum(self.perturbed_policy[:, col] + self.current_policy[:, col])) # Adds perturbation to current policy and enforces sum(col) = 1
-            #print("Normalized Perturbation Policy:")
-            #print(self.perturbed_policy[:, col])
     
- 
+class RNG(Environment):
+    def __init__(self):
+        # create the RNG that you want to pass around
+        self.rng_parent = np.random.default_rng(self.seed)
+        # get the SeedSequence of the passed RNG
+        self.ss = self.rng_parent.bit_generator._seed_seq
+        # create MC_runs initial independent states, last is for PerturbPolicy()
+        self.child_states = self.ss.spawn(self.MC_runs+1)
+        self.rng_children = [np.random.default_rng(self.child_states[k]) for k in range(self.MC_runs+1)]

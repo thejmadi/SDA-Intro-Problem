@@ -26,7 +26,7 @@ if __name__ == '__main__':
     # States in [r_x, r_y, v_x, v_y].T format
     
     # Call Kalman Filter
-    J_optimized = fc.MonteCarlo(num_runs)
+    J_optimized = fc.MultiMonteCarlo(num_runs)
     
     # Call plots
     plot.OptimizedCost(num_runs, J_optimized)
