@@ -23,13 +23,13 @@ def ErrorBars(robot, k):
     return
 
 def ResetInstances(robots, sensors):
-    for k in range(int(len(robots)/2)):
+    for k in range(1):
         robots[k].Reset(k)
         robots[k+1].Reset(k+1)
-    for k in range(len(sensors)):
+    for k in range(1):
         sensors[k].Reset(k)
 
-def KF(robots, sensors, optimize, is_perturbed, is_multi, rng_child):
+def KF(robots, sensors, optimize, is_perturbed, is_multi, rng_child = None):
     #rng_child.random()
     dim_state = robots[0].dim_state
     dim_msmt = robots[0].dim_msmt
@@ -99,46 +99,24 @@ def KF(robots, sensors, optimize, is_perturbed, is_multi, rng_child):
 
 def GradientDescent(optimize, J, J_pert):
     # Gradient Descent Formula
-    #print("dJ: ", J-J_pert)
-    #print("Current Policy: ")
-    #print(optimize.current_policy)
-    #print("Perturbed Policy: ")
-    #print(optimize.perturbed_policy)
-    #print("Policy Ratio: ")
-    #print(optimize.perturbed_policy/ optimize.current_policy - np.ones(optimize.current_policy.shape))
-    #print("dpi:")
-    #print(optimize.perturbed_policy - optimize.current_policy)
-    #print("RHS: ")
-    #print(optimize.learn_rate * (J - J_pert) / (optimize.current_policy - optimize.perturbed_policy))
     gradient = (J_pert - J) / (optimize.perturbed_policy - optimize.current_policy)
-    '''
-    max_grad_col = 0
-    max_grad = 0#np.max(gradient)
-    print("Gradient")
-    print(gradient)
-    for col in range(gradient.shape[1]):
-        if np.max(abs(gradient[:, col])) > max_grad:
-            max_grad = np.max(abs(gradient[:, col]))
-            max_grad_col = col
-    gradient[:, :max_grad_col].fill(0.0)
-    gradient[:, (max_grad_col+1):].fill(0.0)
-    '''
     optimize.current_policy -= optimize.learn_rate * gradient
-    #print("New Policy: ")
-    #print(optimize.current_policy)
+
     # Fill optimize's perturbed policy with 0
     optimize.Reset3()
+    
+    # Enforce bounds for Policy elements
+    for row in range(optimize.current_policy.shape[0]):
+        for col in range(optimize.current_policy.shape[1]):
+            if optimize.current_policy[row, col] > 1:
+                optimize.current_policy[row, col] = 0.98
+            elif optimize.current_policy[row, col] < 0:
+                optimize.current_policy[row, col] = 0.02
 
-def MultiTask(robots, sensors, optimize, is_perturbed, child_id):
+def MultiTaskFunction(robots, sensors, optimize, is_perturbed, child_id):
     KF(robots, sensors, optimize, is_perturbed, True, child_id)
     # Calc cost per run
     optimize.MultiCostPerRun()
-
-    ''' Don't think I need to reset anymore with multiprocessing
-    # Reset optimize, robots, sensors
-    optimize.Reset1()
-    ResetInstances(robots, sensors)
-    '''
 
     return optimize.multi_J_runs
 
@@ -163,82 +141,35 @@ def MonteCarlo(num_runs):
     # Create Instance of Optimization()
     optimize = ent.Optimization(len(robots))
     
-    # Create Instance of RNG()
-    rng_class = ent.RNG()
-    
-
-    #rng_base = np.random.default_rng()
-    #print(rng_base.random())
-    
     # Run Monte Carlo (num_runs * MC_runs) times
     for r in range(num_runs):
         # Start: Monte Carlo for Unperturbed Policy_k
         for n in range(optimize.MC_runs):
             # Call Kalman Filter Function
-            #print(rng_class.rng_children[n].random.get_state()[1][0])
-            #print(rng_class.rng_children[n].random())
-            #print("n: ", n)
-            robots, sensors, optimize = KF(robots, sensors, optimize, False, True, rng_class.rng_children[n])
-            '''
-            # Plot graphs
-            plot.PlotRoom(robots)
-            plot.PlotGraph(robots)
-            plot.PlotSensorTargets(sensors)
-            '''
-            #plot.PlotRoom(robots)
+            robots, sensors, optimize = KF(robots, sensors, optimize, False, False)
             # Calc cost per run
             optimize.CostPerRun(n)
+            #plot.PlotRoom(robots)
             # Reset optimize, robots, sensors
             optimize.Reset1()
             ResetInstances(robots, sensors)
         # Calc Total Cost for 1 Monte Carlo batch
         optimize.CostTotal()
-        #optimize.ToFile()
-        #print(len(optimize.sets_dyn)-1)
-        #print(optimize.sets_dyn)
-        #print(len(optimize.arr_dyn))
-        #print(optimize.arr_dyn)
-        #print()
-        #print(len(optimize.sets_obs))
-        #print(optimize.sets_obs)
-        #print(len(optimize.arr_obs))
-        #print(optimize.arr_obs)
-        #print()
-        #print(len(optimize.sets_task))
-        #print(optimize.sets_task)
-        #print(len(optimize.arr_task))
-        #print(optimize.arr_task)
-        print()
         J[r] = optimize.J
-        
+        plot.PlotRoom(robots)
         if J[r] < optimize.min_cost:
             optimize.min_cost = J[r]
             optimize.optimal_policy = optimize.current_policy
             optimize.min_iter = r
-        plt.scatter(range(1,optimize.MC_runs+1), optimize.J_runs)
-        plt.show()
-        print(len(optimize.J_runs))
-        print(optimize.J_runs)
-        print(len(set(optimize.J_runs)))
-        print(set(optimize.J_runs))
-        print(J)
         optimize.Reset2()
         # End: Monte Carlo for Unperturbed Policy_k 
-        '''
+
         # Start: Monte Carlo for Perturbed Policy_k
         optimize.PerturbPolicy()
         
         for n in range(optimize.MC_runs):
             # Call Kalman Filter Function
             robots, sensors, optimize = KF(robots, sensors, optimize, True, False)
-            
-            
-            # Plot graphs
-            #plot.PlotRoom(robots)
-            #plot.PlotGraph(robots)
-            #plot.PlotSensorTargets(sensors)
-            
-            
             # Calc cost per run
             optimize.CostPerRun(n)
             
@@ -255,32 +186,15 @@ def MonteCarlo(num_runs):
         # End: Monte Carlo for Perturbed Policy_k
         
         # Start: Gradient Descent
-        print("Policy Iter: ", r+1)
-        print("Cost: ", J[r])
-        print("Perturbed Cost: ", J_pert[r])
         GradientDescent(optimize, J[r], J_pert[r])
-        #optimize.learn_rate *= 0.99
-        print("Learning Rate:", optimize.learn_rate)
         # End: Gradient Descent
-        
-        #print("Policy Iter: ", r+1)
-        #print("Cost: ", J[r])
-        #print("Perturbed Cost: ", J_pert[r])
-        #print("New Policy")
-        #print(optimize.current_policy)
+        print("Iter: ", r+1, "Cost: ", J[r])
+        print(optimize.current_policy)
         print()
-        for row in range(optimize.current_policy.shape[0]):
-            for col in range(optimize.current_policy.shape[1]):
-                if optimize.current_policy[row, col] > 1:
-                    optimize.current_policy[row, col] = 0.95
-                if optimize.current_policy[row, col] < 0:
-                    optimize.current_policy[row, col] = 0.05
-                    #raise Exception("Policy out of bounds")
-        '''
-    #print(optimize.min_iter)
-    #print(optimize.min_cost)
-    #print(optimize.optimal_policy)
-    
+
+    print("Min Iter:", optimize.min_iter)
+    print("Min Cost: ", optimize.min_cost)
+    print("Optimal Pol: ", optimize.optimal_policy)
     return J
 
 # Uses Multiprocessing
@@ -304,17 +218,16 @@ def MultiMonteCarlo(num_runs):
     
     # Create Instance of Optimization()
     optimize = ent.Optimization(len(robots))
+
     # Create Instance of RNG()
     rng_class = ent.RNG()
     
     # Run Monte Carlo (num_runs * MC_runs) times
-    for r in range(num_runs):
-        
+    for r in range(num_runs):        
         # Start: Monte Carlo for Unperturbed Policy_k
         with mlt.Pool(6) as pool:
-            multi_results = [pool.apply_async(MultiTask, args=(robots, sensors, optimize, False, rng_class.rng_children[child_id])) for child_id in range(optimize.MC_runs)]
+            multi_results = [pool.apply_async(MultiTaskFunction, args=(robots, sensors, optimize, False, rng_class.rng_children[child_id])) for child_id in range(optimize.MC_runs)]
             J_runs = [r.get() for r in multi_results]
-        #print(J_runs)
         # Calc Total Cost for 1 Monte Carlo batch
         J[r] = np.sum(J_runs)/optimize.MC_runs
         
@@ -322,44 +235,25 @@ def MultiMonteCarlo(num_runs):
             optimize.min_cost = J[r]
             optimize.optimal_policy = optimize.current_policy
             optimize.min_iter = r
-        #optimize.Reset2()
         # End: Monte Carlo for Unperturbed Policy_k
         
         # Start: Monte Carlo for Perturbed Policy_k
         optimize.PerturbPolicy(True, rng_class.rng_children[-1])
         
         with mlt.Pool(6) as pool:
-            multi_results = [pool.apply_async(MultiTask, args=(robots, sensors, optimize, True, rng_class.rng_children[child_id])) for child_id in range(optimize.MC_runs)]
+            multi_results = [pool.apply_async(MultiTaskFunction, args=(robots, sensors, optimize, True, rng_class.rng_children[child_id])) for child_id in range(optimize.MC_runs)]
             J_runs = [r.get() for r in multi_results]
         J_pert[r] = np.sum(J_runs)/optimize.MC_runs
         # End: Monte Carlo for Perturbed Policy_k
         
         # Start: Gradient Descent
-        #print("Policy Iter: ", r+1)
-        #print("Cost: ", J[r])
-        #print("Perturbed Cost: ", J_pert[r])
         GradientDescent(optimize, J[r], J_pert[r])
-        #optimize.learn_rate *= 0.99
-        #print("Learning Rate:", optimize.learn_rate)
         # End: Gradient Descent
-        
-        print("Policy Iter: ", r+1)
-        print("Cost: ", J[r])
-        print("Perturbed Cost: ", J_pert[r])
-        #print("New Policy")
-        #print(optimize.current_policy)
+        print("Iter: ", r+1, "Cost: ", J[r])
+        print(optimize.current_policy)
         print()
-        for row in range(optimize.current_policy.shape[0]):
-            for col in range(optimize.current_policy.shape[1]):
-                if optimize.current_policy[row, col] > 1:
-                    optimize.current_policy[row, col] = 0.98
-                if optimize.current_policy[row, col] < 0:
-                    optimize.current_policy[row, col] = 0.02
-                    #raise Exception("Policy out of bounds")
-        
-        #print("Run: ", r+1, "\tCost: ", J)
-    print("Min Iteration: ", optimize.min_iter+1)
+
+    print("Min Iter:", optimize.min_iter)
     print("Min Cost: ", optimize.min_cost)
-    print("Optimal Policy")
-    print(optimize.optimal_policy)
+    print("Optimal Pol: ", optimize.optimal_policy)
     return J
