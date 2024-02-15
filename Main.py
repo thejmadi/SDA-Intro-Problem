@@ -18,26 +18,17 @@ import numpy as np
 import Entities as ent
 import Functions as fc
 import Plots as plot
+import time as time
 
 if __name__ == '__main__':
-    num_runs = 100
+    num_runs = 20
     J_optimized = np.zeros(num_runs)
     
     # States in [r_x, r_y, v_x, v_y].T format
-    
+    start = time.time()
     # Call Kalman Filter
     J_optimized = fc.MultiMonteCarlo(num_runs)
-    
+    end = time.time()
+    print("Total time = ", end - start)
     # Call plots
     plot.OptimizedCost(num_runs, J_optimized)
-'''  
-# Create cProfile Data
-run = cProfile.Profile()
-run.run("Main()")
-run.dump_stats("cProfile.prof")
-
-with open("cProfile.txt", "w") as txt:
-    stats = pstats.Stats("cProfile.prof", stream = txt)
-    stats.sort_stats("cumtime")
-    stats.print_stats()
-'''
