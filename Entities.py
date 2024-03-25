@@ -20,7 +20,7 @@ class Environment(object):
     l = np.array([10, 10])                                                     # Length of room (x,y)
     dim_state, dim_msmt = 4, 2
     
-    time_start, time_end = 0, 4 
+    time_start, time_end = 0, 3 
     timestep = 1.0
     t_array = np.arange(time_start, time_end + timestep, timestep)
     T = t_array.shape[0]
@@ -32,10 +32,10 @@ class Environment(object):
     sig_bounds = 3
     
     # Robot Parameters, Shown for 2 robots
-    vel = np.array([[2, 1], [1, 2]])
-    start_pos = np.array([[5, 0], [0, 5]])
-    Q_robot = np.array([[0.25, 0.25, 0, 0], [0.25, 0.25, 0, 0]])
-    N = 2;
+    vel = np.array([[2, 1], [1, 2], [2, 2]])
+    start_pos = np.array([[5, 0], [0, 5], [0, 0]])
+    Q_robot = np.array([[0.25, 0.25, 0, 0], [0.25, 0.25, 0, 0], [0.25, 0.25, 0, 0]])
+    N = 3;
     
     # Sensor Parameters, Shown for 2 sensor, Only using first 1
     sensor_position = np.array([[0, 0], [0, 0]])
@@ -45,10 +45,13 @@ class Environment(object):
     
     # Policy index 0 is index 1 in t array (After 1 timestep)
     current_policy = np.ones((N, T - 1))/N
+    #current_policy = np.array([[0, 0, 0],
+    #                           [0, 0, 0],
+    #                           [1, 1, 1]])
     optimal_policy = np.zeros((current_policy.shape))
     min_cost = 100000
     min_iter = 0
-    learn_rate = 0.004
+    learn_rate = 0.05
     
     seed = 98765
         
@@ -140,6 +143,7 @@ class Robot(Environment):
         for i in range(self.dim_state):
             X_k_prop[i] = X_k_prop[i].subs([(r_x, X_k[0]), (r_y, X_k[1]), (v_x, X_k[2]), (v_y, X_k[3]), (k, k_k)])
         
+        
         if is_act == True and is_multi == True:
             rand = rng.multivariate_normal(np.zeros(self.dim_state),self.w[1])
             X_k_prop += self.G @ rand
@@ -196,16 +200,16 @@ class Optimization(Environment):
         else:
             self.frozen_J[n, t] += np.trace(cov) / self.MC_runs
         
-    def UpdatePartialJ(self, t):
-        self.partial_J[0, t] = np.sum(self.frozen_J)
+    def UpdatePartialJ(self, n, t):
+        self.partial_J[n, t] = np.sum(self.frozen_J)
         self.frozen_J.fill(0)
 
-    def FreezePolicy(self, t):
+    def FreezePolicy(self, n, t):
         # Repair col t-1
-        if t != 0:
+        if t != 0 and n == 0:
             self.frozen_policy[:, t-1] = self.current_policy[:, t-1]
-        self.frozen_policy[:, t].fill(0)
-        self.frozen_policy[0, t] = 1.0
+        self.frozen_policy[:, t].fill(0)   
+        self.frozen_policy[n, t] = 1.0
 
     def Tasking(self, t, is_multi, is_frozen, rng):
     # Tasks each sensor at every timestep (timestep t, bool is_perturbed, bool is_multi, obj rng)

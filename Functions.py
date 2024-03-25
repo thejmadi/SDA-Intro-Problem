@@ -27,6 +27,7 @@ def ResetInstances(robots, sensors):
     for k in range(1):
         robots[k].Reset(k)
         robots[k+1].Reset(k+1)
+        robots[k+2].Reset(k+2)
     for k in range(1):
         sensors[k].Reset(k)
 
@@ -100,21 +101,31 @@ def KF(robots, sensors, optimize, is_multi, is_frozen, rng_child = None):
 def GradientDescent(optimize):
     # Gradient Descent Formula
     #print(optimize.partial_J)
-    for t in range(optimize.T-1):
-        for n in range(1, optimize.N):
-            optimize.partial_J[n, t] = optimize.J[n, t] - optimize.J[0, t] + optimize.partial_J[0, t]
-    print(optimize.J)
+    print("Frozen Expected Costs: ")
     print(optimize.partial_J)
-    optimize.current_policy -= optimize.learn_rate * optimize.partial_J
+    print()
+    for t in range(optimize.T-1):
+        for n in range(optimize.N-1):
+            optimize.partial_J[n, t] = optimize.partial_J[n, t] - optimize.partial_J[-1, t]
     
-    # Enforce bounds for Policy elements
-    for row in range(optimize.current_policy.shape[0]):
+    optimize.current_policy[:-1, :] -= optimize.learn_rate * optimize.partial_J[:-1, :]
+    
+    # Enforce bounds for rows 0 -> N-1
+    for row in range(optimize.current_policy.shape[0]-1):
         for col in range(optimize.current_policy.shape[1]):
-            if optimize.current_policy[row, col] > 1:
-                optimize.current_policy[row, col] = 0.98
-            elif optimize.current_policy[row, col] < 0:
-                optimize.current_policy[row, col] = 0.02
+            #if optimize.current_policy[row, col] > 1:
+            #    optimize.current_policy[row, col] = 1.0
+            if optimize.current_policy[row, col] < 0:
+                optimize.current_policy[row, col] = 0.0
+    
+    optimize.current_policy[-1, :] = np.maximum(0.0, 1 - np.sum(optimize.current_policy[:-1, :], axis=0))
+    optimize.current_policy = optimize.current_policy / np.sum(optimize.current_policy, axis=0)
+    
+    print("Updated Policy: ")
     print(optimize.current_policy)
+    print("Sum: ")
+    print(np.sum(optimize.current_policy, axis=0))
+    print()
     return None
 
 def MonteCarlo(robots, sensors, optimize, is_frozen):
