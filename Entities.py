@@ -44,14 +44,14 @@ class Environment(object):
     S = 1
     
     # Policy index 0 is index 1 in t array (After 1 timestep)
-    current_policy = np.ones((N, T - 1))/N
-    #current_policy = np.array([[0, 0, 0],
-    #                           [0, 0, 0],
-    #                           [1, 1, 1]])
+    #current_policy = np.ones((N, T - 1))/N
+    current_policy = np.array([[0.1, 0.1, 0.1],
+                               [0.1, 0.8, 0.8],
+                               [0.8, 0.1, 0.1]])
     optimal_policy = np.zeros((current_policy.shape))
     min_cost = 100000
     min_iter = 0
-    learn_rate = 0.05
+    learn_rate = 0.02
     
     seed = 98765
         
@@ -200,16 +200,24 @@ class Optimization(Environment):
         else:
             self.frozen_J[n, t] += np.trace(cov) / self.MC_runs
         
-    def UpdatePartialJ(self, n, t):
-        self.partial_J[n, t] = np.sum(self.frozen_J)
-        self.frozen_J.fill(0)
+    def UpdatePartialJ(self, n, is_new_approach, t = None):
+        if is_new_approach:
+            self.partial_J[n, :] = self.frozen_J[n, :]
+        else:
+            self.partial_J[n, t] = np.sum(self.frozen_J)
+            self.frozen_J.fill(0)
 
-    def FreezePolicy(self, n, t):
-        # Repair col t-1
-        if t != 0 and n == 0:
-            self.frozen_policy[:, t-1] = self.current_policy[:, t-1]
-        self.frozen_policy[:, t].fill(0)   
-        self.frozen_policy[n, t] = 1.0
+    def FreezePolicy(self, n, is_new_approach, t = None):
+        if is_new_approach:
+            self.frozen_policy.fill(0.0)
+            self.frozen_policy[n, :].fill(1.0)
+        else:
+            # Repair col t-1
+            if t != 0 and n == 0:
+                self.frozen_policy[:, t-1] = self.current_policy[:, t-1]
+            self.frozen_policy[:, t].fill(0)   
+            self.frozen_policy[n, t] = 1.0
+        
 
     def Tasking(self, t, is_multi, is_frozen, rng):
     # Tasks each sensor at every timestep (timestep t, bool is_perturbed, bool is_multi, obj rng)

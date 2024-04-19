@@ -98,15 +98,14 @@ def KF(robots, sensors, optimize, is_multi, is_frozen, rng_child = None):
 
     return None
 
-def GradientDescent(optimize):
+def GradientDescent(optimize, is_new_approach):
     # Gradient Descent Formula
-    #print(optimize.partial_J)
+    
     print("Frozen Expected Costs: ")
     print(optimize.partial_J)
     print()
-    for t in range(optimize.T-1):
-        for n in range(optimize.N-1):
-            optimize.partial_J[n, t] = optimize.partial_J[n, t] - optimize.partial_J[-1, t]
+    for n in range(optimize.N-1):
+        optimize.partial_J[n, :] = optimize.partial_J[n, :] - optimize.partial_J[-1, :]
     
     optimize.current_policy[:-1, :] -= optimize.learn_rate * optimize.partial_J[:-1, :]
     
