@@ -103,7 +103,7 @@ def PlotSensorTargets(sensors):
     return
 
 def OptimizedCost(runs, J):
-    runs_arr = np.arange(0+1, runs+1, 1)
+    runs_arr = np.arange(0, runs+1, 1)
     plt.scatter(runs_arr, J)
     plt.title("Cost vs Iteration")
     plt.xlabel("Iteration Number")
