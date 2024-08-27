@@ -16,6 +16,7 @@ import Entities as ent
 import Plots as plot
 import multiprocessing as mlt
 import matplotlib.pyplot as plt
+import copy
 #import sys
 
 
@@ -98,7 +99,15 @@ def KF(robots, sensors, optimize, is_multi, is_frozen, rng_child = None):
 
     return None
 
-def GradientDescent(optimize):
+def SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen, rng_class):
+    if is_multi:
+        J_policy = MultiMonteCarlo(robots, sensors, optimize, is_frozen, rng_class)
+    else:
+        J_policy = MonteCarlo(robots, sensors, optimize, is_frozen)
+    optimize.J.fill(0)
+    return J_policy
+    
+def GradientDescent(robots, sensors, optimize, is_multi, rng_class):
     # Gradient Descent Formula
     #print(optimize.partial_J)
     print("Frozen Expected Costs: ")
@@ -107,6 +116,8 @@ def GradientDescent(optimize):
     for t in range(optimize.T-1):
         for n in range(optimize.N-1):
             optimize.partial_J[n, t] = optimize.partial_J[n, t] - optimize.partial_J[-1, t]
+    
+    J_curr = SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
     
     optimize.current_policy[:-1, :] -= optimize.learn_rate * optimize.partial_J[:-1, :]
     
@@ -121,12 +132,34 @@ def GradientDescent(optimize):
     optimize.current_policy[-1, :] = np.maximum(0.0, 1 - np.sum(optimize.current_policy[:-1, :], axis=0))
     optimize.current_policy = optimize.current_policy / np.sum(optimize.current_policy, axis=0)
     
+    J_new = SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
+    
+    optimize.J.fill(0)
+    print("J_curr = ", J_curr)
+    print("J_new = ", J_new)
+    if J_new > J_curr:    
+        optimize.current_policy[:-1, :] += 2*optimize.learn_rate * optimize.partial_J[:-1, :]
+        for row in range(optimize.current_policy.shape[0]-1):
+            for col in range(optimize.current_policy.shape[1]):
+                #if optimize.current_policy[row, col] > 1:
+                #    optimize.current_policy[row, col] = 1.0
+                if optimize.current_policy[row, col] < 0:
+                    optimize.current_policy[row, col] = 0.0
+        
+        optimize.current_policy[-1, :] = np.maximum(0.0, 1 - np.sum(optimize.current_policy[:-1, :], axis=0))
+        optimize.current_policy = optimize.current_policy / np.sum(optimize.current_policy, axis=0)
+        
+        J_new = SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
+        
+        print("J_new = ", J_new)
+        optimize.J.fill(0)
+    #J_new = J_curr
     print("Updated Policy: ")
     print(optimize.current_policy)
     print("Sum: ")
     print(np.sum(optimize.current_policy, axis=0))
     print()
-    return None
+    return J_new
 
 def MonteCarlo(robots, sensors, optimize, is_frozen):
     for n in range(optimize.MC_runs):
@@ -134,48 +167,26 @@ def MonteCarlo(robots, sensors, optimize, is_frozen):
         ResetInstances(robots, sensors)
     return np.sum(optimize.J)
 
-def MultiTaskFunction(robots, sensors, optimize, is_perturbed, child_id):
-    KF(robots, sensors, optimize, is_perturbed, True, child_id)
+def MultiTaskFunction(robots, sensors, optimize, is_frozen, child_id):
+    KF(robots, sensors, optimize, True, is_frozen, child_id)
     # Calc cost per run
-    optimize.MultiCostPerRun()
-
-    return optimize.multi_J_runs
+    if is_frozen:
+        J = optimize.frozen_J
+    else:
+        J = optimize.J
+    
+    return J
 
 # Uses Multiprocessing
-def MultiMonteCarlo(num_runs):
-    
-    # Run Monte Carlo (num_runs * MC_runs) times
-    for r in range(num_runs):        
-        # Start: Monte Carlo for Unperturbed Policy_k
-        with mlt.Pool(6) as pool:
-            multi_results = [pool.apply_async(MultiTaskFunction, args=(robots, sensors, optimize, False, rng_class.rng_children[child_id])) for child_id in range(optimize.MC_runs)]
-            J_runs = [r.get() for r in multi_results]
-        # Calc Total Cost for 1 Monte Carlo batch
-        J[r] = np.sum(J_runs)/optimize.MC_runs
-        
-        if J[r] < optimize.min_cost:
-            optimize.min_cost = J[r]
-            optimize.optimal_policy = optimize.current_policy
-            optimize.min_iter = r
-        # End: Monte Carlo for Unperturbed Policy_k
-        
-        # Start: Monte Carlo for Perturbed Policy_k
-        optimize.PerturbPolicy(True, rng_class.rng_children[-1])
-        
-        with mlt.Pool(6) as pool:
-            multi_results = [pool.apply_async(MultiTaskFunction, args=(robots, sensors, optimize, True, rng_class.rng_children[child_id])) for child_id in range(optimize.MC_runs)]
-            J_runs = [r.get() for r in multi_results]
-        J_pert[r] = np.sum(J_runs)/optimize.MC_runs
-        # End: Monte Carlo for Perturbed Policy_k
-        
-        # Start: Gradient Descent
-        GradientDescent(optimize, J[r], J_pert[r])
-        # End: Gradient Descent
-        print("Iter: ", r+1, "Cost: ", J[r])
-        print(optimize.current_policy)
-        print()
-
-    print("Min Iter:", optimize.min_iter)
-    print("Min Cost: ", optimize.min_cost)
-    print("Optimal Pol: ", optimize.optimal_policy)
-    return J
+def MultiMonteCarlo(robots, sensors, optimize, is_frozen, rng_class):
+    J_run = np.zeros((optimize.N, optimize.T-1))
+    with mlt.Pool(6) as pool:
+        multi_results = [pool.apply_async(MultiTaskFunction, args=(robots, sensors, optimize, is_frozen, rng_class.rng_children[child_id])) for child_id in range(optimize.MC_runs)]
+        for r in multi_results:
+            J_run += r.get()
+    # Calc Total Cost for 1 Monte Carlo batch
+    if is_frozen:
+        optimize.frozen_J = copy.deepcopy(J_run)
+    else:
+        optimize.J = copy.deepcopy(J_run)
+    return np.sum(optimize.J)

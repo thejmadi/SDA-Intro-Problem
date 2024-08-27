@@ -20,9 +20,9 @@ import Functions as fc
 import Plots as plot
 
 if __name__ == '__main__':
-    is_multi = False
-    num_iter = 50
-    J_optimized = np.zeros(num_iter)
+    is_multi = True
+    num_iter = 10
+    J_optimized = np.zeros(num_iter+1)
     
     # States in [r_x, r_y, v_x, v_y].T format
 
@@ -44,29 +44,56 @@ if __name__ == '__main__':
     optimize = ent.Optimization()
 
     # Create Instance of RNG()
-    if is_multi: rng_class = ent.RNG()
+    if is_multi:
+        rng_class = ent.RNG()
+    else:
+        rng_class = None
     
     # Outer-most loop/s; Optimizes Policy
+    J_optimized[0] = fc.SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
+    optimize.J.fill(0)
+    for k in range(num_iter):
+        print("Iter k = ", k+1)
+        for t in range(optimize.T-1):
+            print("Timestep: ", t+1)
+            for n in range(optimize.N):
+                optimize.FreezePolicy(n, t)
+                fc.SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = True, rng_class = rng_class)
+                #print(optimize.frozen_J)
+                optimize.UpdatePartialJ(n, t)
+        J_optimized[k+1] = fc.GradientDescent(robots, sensors, optimize, is_multi, rng_class = rng_class)
+        optimize.Reset()
+    '''
     if is_multi:
+        J_optimized[0] = fc.SimulatePolicy(robots, sensors, optimize, is_frozen = False, rng_class)
+        optimize.J.fill(0)
         for k in range(num_iter):
-            J_optimized[k] = fc.MultiMonteCarlo(robots, sensors, optimize, rng_class)
+            print("Iter k = ", k+1)
+            for t in range(optimize.T-1):
+                print("Timestep: ", t+1)
+                for n in range(optimize.N):
+                    optimize.FreezePolicy(n, t)
+                    fc.MultiMonteCarlo(robots, sensors, optimize, is_frozen = True)
+                    optimize.UpdatePartialJ(n, t)
+            J_optimized[k+1] = fc.GradientDescent(robots, sensors, optimize, is_multi, rng_class)
     
     else:
+        J_optimized[0] = fc.MonteCarlo(robots, sensors, optimize, is_frozen = False)
+        optimize.J.fill(0)
         for k in range(num_iter):
             print("Iter k =", k+1)
-            J_optimized[k] = fc.MonteCarlo(robots, sensors, optimize, is_frozen = False)
             for t in range(optimize.T-1):
                 print("Timestep: ", t+1)
                 for n in range(optimize.N):
                     optimize.FreezePolicy(n, t)
                     fc.MonteCarlo(robots, sensors, optimize, is_frozen = True)
                     optimize.UpdatePartialJ(n, t)
-            fc.GradientDescent(optimize)
+            J_optimized[k+1] = fc.GradientDescent(robots, sensors, optimize, is_multi)
             optimize.Reset()
-    
+    '''
     
     #cost = fc.MonteCarlo(robots, sensors, optimize, is_frozen = False)
     #print("Min cost: ")
     #print(min(J_optimized))
     # Call plots
-    #plot.OptimizedCost(num_iter, J_optimized)
+    plot.OptimizedCost(num_iter, J_optimized)
