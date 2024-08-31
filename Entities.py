@@ -20,22 +20,22 @@ class Environment(object):
     l = np.array([10, 10])                                                     # Length of room (x,y)
     dim_state, dim_msmt = 4, 2
     
-    time_start, time_end = 0, 3 
+    time_start, time_end = 0, 10
     timestep = 1.0
     t_array = np.arange(time_start, time_end + timestep, timestep)
     T = t_array.shape[0]
     
-    MC_runs = 200
+    MC_runs = 20
     
     G, M = timestep*np.identity(dim_state), np.identity(dim_msmt)
     
     sig_bounds = 3
     
-    # Robot Parameters, Shown for 2 robots
-    vel = np.array([[2, 1], [1, 2], [2, 2]])
-    start_pos = np.array([[5, 0], [0, 5], [0, 0]])
-    Q_robot = np.array([[0.25, 0.25, 0, 0], [0.25, 0.25, 0, 0], [0.25, 0.25, 0, 0]])
-    N = 3;
+    # Robot Parameters, Shown for 2 robots (x, y)
+    vel = np.array([[2, 2], [1, 2], [1, -2], [-1, -2], [-1, -1], [-1, 1], [-2, 2], [-1, 1]])
+    start_pos = np.array([[0, 0], [0, 5], [0, 10], [5, 10], [10, 10], [10, 5], [10, 0], [5, 0]])
+    Q_robot = np.ones((8, 4)) @ np.diag([0.25, 0.25, 0, 0])
+    N = 3
     
     # Sensor Parameters, Shown for 2 sensor, Only using first 1
     sensor_position = np.array([[0, 0], [0, 0]])
