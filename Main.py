@@ -21,17 +21,17 @@ import Plots as plot
 
 if __name__ == '__main__':
     is_multi = True
-    num_iter = 10
-    J_optimized = np.zeros(num_iter+1)
+    num_iter = 15
     
     # States in [r_x, r_y, v_x, v_y].T format
 
     # Create Instances of robots, 1 of type 1, 1 of type 2
     robots = []
-    for k in range(1):
+    for k in range(4, 7):
         robots.append(ent.Robot(k))
-        robots.append(ent.Robot(k+1))
-        robots.append(ent.Robot(k+2))
+        #robots.append(ent.Robot(k+1))
+        #robots.append(ent.Robot(k+2))
+        #robots.append(ent.Robot(k+3))
     robots[0].number_robots = len(robots)
 
     # Create Instances of sensors, 1 of type 1
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     
     # Create Instance of Optimization()
     optimize = ent.Optimization()
-
+    
     # Create Instance of RNG()
     if is_multi:
         rng_class = ent.RNG()
@@ -50,7 +50,9 @@ if __name__ == '__main__':
         rng_class = None
     
     # Outer-most loop/s; Optimizes Policy
-    J_optimized[0] = fc.SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
+    J_optimized = np.zeros((robots[0].number_robots, num_iter+1))
+    J_optimized[:, 0] = fc.SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
+    plot.PlotRoom(robots)
     optimize.J.fill(0)
     for k in range(num_iter):
         print("Iter k = ", k+1)
@@ -61,7 +63,7 @@ if __name__ == '__main__':
                 fc.SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = True, rng_class = rng_class)
                 #print(optimize.frozen_J)
                 optimize.UpdatePartialJ(n, t)
-        J_optimized[k+1] = fc.GradientDescent(robots, sensors, optimize, is_multi, rng_class = rng_class)
+        J_optimized[:, k+1] = fc.GradientDescent(robots, sensors, optimize, is_multi, rng_class = rng_class)
         optimize.Reset()
     '''
     if is_multi:

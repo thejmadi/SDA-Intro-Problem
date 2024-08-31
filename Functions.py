@@ -110,9 +110,9 @@ def SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen, rng_class):
 def GradientDescent(robots, sensors, optimize, is_multi, rng_class):
     # Gradient Descent Formula
     #print(optimize.partial_J)
-    print("Frozen Expected Costs: ")
-    print(optimize.partial_J)
-    print()
+    #print("Frozen Expected Costs: ")
+    #print(optimize.partial_J)
+    #print()
     for t in range(optimize.T-1):
         for n in range(optimize.N-1):
             optimize.partial_J[n, t] = optimize.partial_J[n, t] - optimize.partial_J[-1, t]
@@ -135,9 +135,9 @@ def GradientDescent(robots, sensors, optimize, is_multi, rng_class):
     J_new = SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
     
     optimize.J.fill(0)
-    print("J_curr = ", J_curr)
-    print("J_new = ", J_new)
-    if J_new > J_curr:    
+    print("J_curr = ", np.sum(J_curr))
+    print("J_new = ", np.sum(J_new))
+    if np.sum(J_new) > np.sum(J_curr):    
         optimize.current_policy[:-1, :] += 2*optimize.learn_rate * optimize.partial_J[:-1, :]
         for row in range(optimize.current_policy.shape[0]-1):
             for col in range(optimize.current_policy.shape[1]):
@@ -151,13 +151,13 @@ def GradientDescent(robots, sensors, optimize, is_multi, rng_class):
         
         J_new = SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
         
-        print("J_new = ", J_new)
+        print("J_new = ", np.sum(J_curr))
         optimize.J.fill(0)
     #J_new = J_curr
     print("Updated Policy: ")
     print(optimize.current_policy)
-    print("Sum: ")
-    print(np.sum(optimize.current_policy, axis=0))
+    #print("Sum: ")
+    #print(np.sum(optimize.current_policy, axis=0))
     print()
     return J_new
 
@@ -189,4 +189,4 @@ def MultiMonteCarlo(robots, sensors, optimize, is_frozen, rng_class):
         optimize.frozen_J = copy.deepcopy(J_run)
     else:
         optimize.J = copy.deepcopy(J_run)
-    return np.sum(optimize.J)
+    return np.sum(optimize.J, axis=1)
