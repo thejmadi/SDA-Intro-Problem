@@ -25,10 +25,8 @@ def ErrorBars(robot, k):
     return
 
 def ResetInstances(robots, sensors):
-    for k in range(1):
+    for k in range(6):
         robots[k].Reset(k)
-        robots[k+1].Reset(k+1)
-        robots[k+2].Reset(k+2)
     for k in range(1):
         sensors[k].Reset(k)
 
@@ -107,18 +105,21 @@ def SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen, rng_class):
     optimize.J.fill(0)
     return J_policy
     
-def GradientDescent(robots, sensors, optimize, is_multi, rng_class):
+def GradientDescent(iter_num, robots, sensors, optimize, is_multi, rng_class):
     # Gradient Descent Formula
     #print(optimize.partial_J)
     #print("Frozen Expected Costs: ")
     #print(optimize.partial_J)
     #print()
+    #if iter_num == 5:
+        #print()
     for t in range(optimize.T-1):
         for n in range(optimize.N-1):
             optimize.partial_J[n, t] = optimize.partial_J[n, t] - optimize.partial_J[-1, t]
     
     J_curr = SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
-    
+    temp_policy = np.zeros(optimize.current_policy.shape)
+    temp_policy[:, :] = optimize.current_policy[:, :]
     optimize.current_policy[:-1, :] -= optimize.learn_rate * optimize.partial_J[:-1, :]
     
     # Enforce bounds for rows 0 -> N-1
@@ -135,10 +136,13 @@ def GradientDescent(robots, sensors, optimize, is_multi, rng_class):
     J_new = SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
     
     optimize.J.fill(0)
+    
     print("J_curr = ", np.sum(J_curr))
     print("J_new = ", np.sum(J_new))
+    
     if np.sum(J_new) > np.sum(J_curr):    
-        optimize.current_policy[:-1, :] += 2*optimize.learn_rate * optimize.partial_J[:-1, :]
+        optimize.learn_rate *= 0.8
+        optimize.current_policy[:-1, :] = temp_policy[:-1, :] - optimize.learn_rate * optimize.partial_J[:-1, :]
         for row in range(optimize.current_policy.shape[0]-1):
             for col in range(optimize.current_policy.shape[1]):
                 #if optimize.current_policy[row, col] > 1:
@@ -151,7 +155,7 @@ def GradientDescent(robots, sensors, optimize, is_multi, rng_class):
         
         J_new = SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
         
-        print("J_new = ", np.sum(J_curr))
+        print("J_new = ", np.sum(J_new))
         optimize.J.fill(0)
     #J_new = J_curr
     print("Updated Policy: ")

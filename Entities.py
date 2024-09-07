@@ -25,7 +25,7 @@ class Environment(object):
     t_array = np.arange(time_start, time_end + timestep, timestep)
     T = t_array.shape[0]
     
-    MC_runs = 20
+    MC_runs = 350
     
     G, M = timestep*np.identity(dim_state), np.identity(dim_msmt)
     
@@ -35,7 +35,7 @@ class Environment(object):
     vel = np.array([[2, 2], [1, 2], [1, -2], [-1, -2], [-1, -1], [-1, 1], [-2, 2], [-1, 1]])
     start_pos = np.array([[0, 0], [0, 5], [0, 10], [5, 10], [10, 10], [10, 5], [10, 0], [5, 0]])
     Q_robot = np.ones((8, 4)) @ np.diag([0.25, 0.25, 0, 0])
-    N = 3
+    N = 6
     
     # Sensor Parameters, Shown for 2 sensor, Only using first 1
     sensor_position = np.array([[0, 0], [0, 0]])
@@ -45,6 +45,8 @@ class Environment(object):
     
     # Policy index 0 is index 1 in t array (After 1 timestep)
     current_policy = np.ones((N, T - 1))/N
+    all_policies = np.zeros((N, T-1, 13))
+    all_policies[:, :, 0] = current_policy
     #current_policy = np.array([[0, 0, 0],
     #                           [0, 0, 0],
     #                           [1, 1, 1]])
