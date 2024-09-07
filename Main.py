@@ -21,17 +21,14 @@ import Plots as plot
 
 if __name__ == '__main__':
     is_multi = True
-    num_iter = 15
+    num_iter = 12
     
     # States in [r_x, r_y, v_x, v_y].T format
 
     # Create Instances of robots, 1 of type 1, 1 of type 2
     robots = []
-    for k in range(4, 7):
+    for k in range(6):
         robots.append(ent.Robot(k))
-        #robots.append(ent.Robot(k+1))
-        #robots.append(ent.Robot(k+2))
-        #robots.append(ent.Robot(k+3))
     robots[0].number_robots = len(robots)
 
     # Create Instances of sensors, 1 of type 1
@@ -49,23 +46,32 @@ if __name__ == '__main__':
     else:
         rng_class = None
     
+    fc.KF(robots, sensors, optimize, True, False, rng_class.rng_children[-1])
+    plot.PlotGraph(robots)
+    fc.ResetInstances(robots, sensors)
+    optimize.Reset()
+    '''
     # Outer-most loop/s; Optimizes Policy
     J_optimized = np.zeros((robots[0].number_robots, num_iter+1))
     J_optimized[:, 0] = fc.SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
-    plot.PlotRoom(robots)
+    #plot.PlotRoom(robots)
     optimize.J.fill(0)
+    
     for k in range(num_iter):
         print("Iter k = ", k+1)
         for t in range(optimize.T-1):
-            print("Timestep: ", t+1)
+            #print("Timestep: ", t+1)
             for n in range(optimize.N):
                 optimize.FreezePolicy(n, t)
                 fc.SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = True, rng_class = rng_class)
                 #print(optimize.frozen_J)
                 optimize.UpdatePartialJ(n, t)
-        J_optimized[:, k+1] = fc.GradientDescent(robots, sensors, optimize, is_multi, rng_class = rng_class)
+        J_optimized[:, k+1] = fc.GradientDescent(k+1, robots, sensors, optimize, is_multi, rng_class = rng_class)
+        optimize.learn_rate *= 0.9
+        optimize.all_policies[:, :, k+1] = optimize.current_policy
         optimize.Reset()
     '''
+    '''Deprecated Code
     if is_multi:
         J_optimized[0] = fc.SimulatePolicy(robots, sensors, optimize, is_frozen = False, rng_class)
         optimize.J.fill(0)
@@ -93,9 +99,5 @@ if __name__ == '__main__':
             J_optimized[k+1] = fc.GradientDescent(robots, sensors, optimize, is_multi)
             optimize.Reset()
     '''
-    
-    #cost = fc.MonteCarlo(robots, sensors, optimize, is_frozen = False)
-    #print("Min cost: ")
-    #print(min(J_optimized))
-    # Call plots
-    plot.OptimizedCost(num_iter, J_optimized)
+    #plot.PlotHeatMapAnimation(optimize.all_policies, num_iter, "Updated Policy", "Time t", "Robot n", "IRHCPolicyUpdate3")
+    #plot.OptimizedCost(num_iter, J_optimized)

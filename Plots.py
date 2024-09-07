@@ -10,7 +10,8 @@ Created on Wed Sep 13 21:40:56 2023
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+from matplotlib import animation
+import matplotlib
 plt.rcParams['figure.dpi'] = 300
 
 def PlotRoom(robots):
@@ -55,8 +56,8 @@ def PlotGraph(robots):
         count = 0
         for i in range(graphs.shape[0]):
             for j in range(graphs.shape[1]):    
-                graphs[i][j].plot(robots[k].t, robots[k].X_act[count, :], c = colors[0], zorder=0, label = 'Act')
-                graphs[i][j].scatter(robots[k].t, robots[k].X_est[count, :], c = colors[1], linestyle='--', label='Est')
+                graphs[i][j].plot(robots[k].t_array, robots[k].X_act[count, :], c = colors[0], zorder=0, label = 'Act')
+                graphs[i][j].scatter(robots[k].t_array, robots[k].X_est[count, :], c = colors[1], linestyle='--', label='Est')
                 graphs[i][j].set_title(plots[count])
                 count += 1
         fig.suptitle("Robot %i States vs. Time" % (k+1))
@@ -70,16 +71,16 @@ def PlotGraph(robots):
     outside = 0
     total = 0
     for k in range(len(robots)):
-        zero = np.zeros(robots[0].t.size)
+        zero = np.zeros(robots[0].T)
         fig, graphs = plt.subplots(2, 2, sharex=True, figsize=(15,9))
         count = 0
         for i in range(graphs.shape[0]):
             for j in range(graphs.shape[1]):    
-                graphs[i][j].errorbar(robots[k].t, zero, yerr=robots[k].error_bars[count, :], fmt=' ', zorder=0)
-                graphs[i][j].scatter(robots[k].t, robots[k].X_act[count, :] - robots[k].X_est[count, :], c = 'r', s =10)
+                graphs[i][j].errorbar(robots[k].t_array, zero, yerr=robots[k].error_bars[count, :], fmt=' ', zorder=0)
+                graphs[i][j].scatter(robots[k].t_array, robots[k].X_act[count, :] - robots[k].X_est[count, :], c = 'r', s =10)
                 graphs[i][j].set_title(plots[count])
                 if count <= 1:
-                    for m in range(robots[0].t.size-1):
+                    for m in range(robots[0].T-1):
                         total += 1
                         if abs(robots[k].X_act[count, m] - robots[k].X_est[count, m]) >= robots[k].error_bars[count, m]:
                             outside += 1
@@ -123,3 +124,24 @@ def OptimizedCost(runs, J):
     plt.xlabel("Iteration Number")
     plt.ylabel("Cost")
     plt.show()
+
+def PlotHeatMapAnimation(data, num_frames, title, x_label, y_label, filename):
+    fig, ax = plt.subplots()
+    im = ax.imshow(data[:, :, 0], cmap="gray")
+    label = fig.text(0, 0, "Iter: 0", fontsize=10)
+    plt.title(title)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.colorbar(im)
+    im.set_clim(0, 1)
+    def animate(i):
+        im.set_data(data[:, :, i])
+        label.set_text("Iter:" + str(i))
+        return im
+
+    anim = animation.FuncAnimation(fig, animate, frames=data.shape[2], repeat = False)
+
+    plt.show()
+    plt.rcParams['animation.ffmpeg_path'] = "D:\\ffmpeg-7.0.2-essentials_build\\ffmpeg-7.0.2-essentials_build\\bin\\ffmpeg.exe"
+    writer = animation.FFMpegWriter(fps=0.25)
+    anim.save(filename + '.mkv', writer=writer)
