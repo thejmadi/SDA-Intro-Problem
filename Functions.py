@@ -25,7 +25,7 @@ def ErrorBars(robot, k):
     return
 
 def ResetInstances(robots, sensors):
-    for k in range(6):
+    for k in range(3):
         robots[k].Reset(k)
     for k in range(1):
         sensors[k].Reset(k)

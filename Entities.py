@@ -20,32 +20,33 @@ class Environment(object):
     l = np.array([10, 10])                                                     # Length of room (x,y)
     dim_state, dim_msmt = 4, 2
     
-    time_start, time_end = 0, 10
-    timestep = 1.0
+    time_start, time_end = 0, 24
+    timestep = 1
     t_array = np.arange(time_start, time_end + timestep, timestep)
     T = t_array.shape[0]
     
-    MC_runs = 350
+    MC_runs = 300
     
     G, M = timestep*np.identity(dim_state), np.identity(dim_msmt)
     
     sig_bounds = 3
     
     # Robot Parameters, Shown for 2 robots (x, y)
-    vel = np.array([[2, 2], [1, 2], [1, -2], [-1, -2], [-1, -1], [-1, 1], [-2, 2], [-1, 1]])
+    # Note: All input noise values are var not std
+    vel = np.array([[2, 1], [2, 2], [1, -2], [-1, -2], [-1, -1], [-1, 1], [-2, 2], [-1, 1]])
     start_pos = np.array([[0, 0], [0, 5], [0, 10], [5, 10], [10, 10], [10, 5], [10, 0], [5, 0]])
-    Q_robot = np.ones((8, 4)) @ np.diag([0.25, 0.25, 0, 0])
-    N = 6
+    Q_robot = (np.ones((8, 4)) @ np.diag([0.01, 0.01, 0, 0])) * np.abs(np.hstack((vel, start_pos)))
+    N = 3
     
     # Sensor Parameters, Shown for 2 sensor, Only using first 1
     sensor_position = np.array([[0, 0], [0, 0]])
     field_of_view = np.array([[0, l[0]/2, 0, l[1]], [0, l[0]/2, 0, l[1]]])
-    R_sensor = np.array([[0.25, 0.25], [0.25, 0.25]])
+    R_sensor = np.array([[0.005, 0.005], [0.005, 0.005]])
     S = 1
     
     # Policy index 0 is index 1 in t array (After 1 timestep)
     current_policy = np.ones((N, T - 1))/N
-    all_policies = np.zeros((N, T-1, 13))
+    all_policies = np.zeros((N, T-1, 11))
     all_policies[:, :, 0] = current_policy
     #current_policy = np.array([[0, 0, 0],
     #                           [0, 0, 0],
@@ -140,16 +141,17 @@ class Robot(Environment):
         return X_k_prop, np.array(F).astype(np.float64), r_x, r_y, v_x, v_y, k
         
     def Propagation(self, X_k, k_k, is_act, is_multi, rng):
-        X_k_prop, _, r_x, r_y, v_x, v_y, k = self.Dynamics(k_k)
         
+        # Propagate robot state
+        X_k_prop, _, r_x, r_y, v_x, v_y, k = self.Dynamics(k_k)
         for i in range(self.dim_state):
             X_k_prop[i] = X_k_prop[i].subs([(r_x, X_k[0]), (r_y, X_k[1]), (v_x, X_k[2]), (v_y, X_k[3]), (k, k_k)])
         
-        
+        # Add in 2d Gaussian noise to propagated position of robot.
+        # Noise is already modulated by timestep
         if is_act == True and is_multi == True:
             rand = rng.multivariate_normal(np.zeros(self.dim_state),self.w[1])
             X_k_prop += self.G @ rand
-        
         # Random for single process
         elif is_act == True and is_multi == False:
             X_k_prop += self.G @ np.random.multivariate_normal(np.zeros(self.dim_state),self.w[1])
@@ -198,7 +200,7 @@ class Optimization(Environment):
     # Updates either self.J or self.frozen_J 
     def UpdateJ(self, cov, n, t, is_frozen):
         if not is_frozen:
-            self.J[n, t] += np.trace(cov) / self.MC_runs
+            self.J[n, t] += np.trace(cov[:2, :2]) / self.MC_runs
         else:
             self.frozen_J[n, t] += np.trace(cov) / self.MC_runs
         
