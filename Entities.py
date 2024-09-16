@@ -10,6 +10,7 @@ Created on Wed Sep 13 21:33:21 2023
 import sympy as sp
 import numpy as np
 from numpy import linalg as la
+import multiprocessing as mlt
 import itertools as it
 
 # Create Environment Class and 3 children classes
@@ -236,7 +237,79 @@ class Optimization(Environment):
                     break
                 prev += self.frozen_policy[n, t]
         return sensor_choice # Outputs index of robot (in robots array) to keep track of 
+
+class MCMC(Environment):
+    num_chains = 6
+    num_burn = 100
+    num_samples = 100
     
+    def Parallelize(self, robots, sensors, optimize):
+        final_policies = []
+        # TODO: Link final policy to chain_id
+        with mlt.Pool(self.num_chains) as pool:
+            multi_results = [pool.apply_async(self.MetropolisHastings, args=(robots, sensors, optimize, chain_id+1)) for chain_id in range(self.num_chains)]
+            for r in multi_results:
+                final_policies.append(r.get())
+    
+    # TODO: Find better proposal technique
+    def Proposal(self, current, last_change):
+        proposed = np.zeros(self.N, self.T-1)
+        proposed[:, :] = current
+        (proposed_row, proposed_col) = last_change
+        while last_change[0] == proposed_row and last_change[1] == proposed_col:
+            proposed_row = rng.integer(0, high=self.N)
+            proposed_col = rng.integer(max(last_change[1], last_change[1]-1), high=min(last_change[1], last_change[1]+1))
+        proposed[:, proposed_col].fill(0)
+        proposed[proposed_row, proposed_col] = 1
+        return proposed, (proposed_row, proposed_col)
+        
+    def Transition(self):
+        
+        return policy
+    
+    def MonteCarlo(self, robots, sensors, optimize):
+        expected_cost_per_robot = 0
+        for m in range(self.MC_runs):
+            expected_cost_per_robot += fc.KF(robots, sensors, optimize)
+            fc.ResetInstances(robots, sensors)
+        expected_cost_per_robot /= self.MC_runs
+        return expected_cost_per_robot
+        
+    # Find better way to construct initial policy
+    def InitialPolicyConstruction(self):
+        ones_idx = rng.integers(self.N, size=self.T-1)
+        policy = np.zeros((self.N, self.T-1))
+        for t in range(self.T-1):
+            policy[ones_idx[t], t] = 1
+        return policy
+    
+    def MetropolisHastings(self, robots, sensors, optimize, chain_id):
+        initial_policy = np.zeros((self.N, self.T-1))
+        initial_policy[:, :] = InitialPolicyConstruction()
+        current_policy = np.zeros((self.N, self.T-1))
+        
+        # Evaluate current policy
+        cur_expected_cost_per_robot = fc.MonteCarlo(robots, sensors)
+        change = rng.integers(1, [self.N, self.T-1])
+        for _ in range(self.num_burn):
+            proposed_policy, proposed_change = self.Proposal(current_policy, change)
+            
+            prop_expected_cost_per_robot = fc.MonteCarlo(robots, sensors)
+            
+            # Acceptance Criteria
+            cost_ratio = np.sum(prop_expected_cost_per_robot) / np.sum(cur_expected_cost_per_robot)
+            alpha = min(1, cost_ratio)
+            
+            threshold = rng.random()
+            if alpha >= threshold:
+                current_policy[:, :] = proposed_policy
+                change = proposed_change
+            
+        for _ in range(self.num_samples):
+            pass
+            
+        return policy
+
 class RNG(Environment):
     def __init__(self):
         # create the RNG that you want to pass around

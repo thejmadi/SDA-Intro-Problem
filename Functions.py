@@ -169,7 +169,7 @@ def MonteCarlo(robots, sensors, optimize, is_frozen):
     for n in range(optimize.MC_runs):
         KF(robots, sensors, optimize, False, is_frozen)
         ResetInstances(robots, sensors)
-    return np.sum(optimize.J)
+    return np.sum(optimize.J, axis=1)
 
 def MultiTaskFunction(robots, sensors, optimize, is_frozen, child_id):
     KF(robots, sensors, optimize, True, is_frozen, child_id)
