@@ -114,52 +114,54 @@ def GradientDescent(iter_num, robots, sensors, optimize, is_multi, rng_class):
     #if iter_num == 5:
         #print()
     for t in range(optimize.T-1):
-        for n in range(optimize.N-1):
+        for n in range(optimize.N):
             optimize.partial_J[n, t] = optimize.partial_J[n, t] - optimize.partial_J[-1, t]
+    
+    print("Frozen Expected Costs: ")
+    print(optimize.partial_J)
+    optimize.all_grads[:, :, iter_num] = optimize.partial_J
     
     J_curr = SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
     temp_policy = np.zeros(optimize.current_policy.shape)
     temp_policy[:, :] = optimize.current_policy[:, :]
-    optimize.current_policy[:-1, :] -= optimize.learn_rate * optimize.partial_J[:-1, :]
-    
+    optimize.current_policy[:, :] = temp_policy[:, :] - optimize.learn_rate * optimize.partial_J[:, :]
+    '''
     # Enforce bounds for rows 0 -> N-1
-    for row in range(optimize.current_policy.shape[0]-1):
-        for col in range(optimize.current_policy.shape[1]):
-            #if optimize.current_policy[row, col] > 1:
-            #    optimize.current_policy[row, col] = 1.0
+    for row in range(optimize.N):
+        for col in range(optimize.T-1):
+            if optimize.current_policy[row, col] > 1:
+                optimize.current_policy[row, col] = 1.0
             if optimize.current_policy[row, col] < 0:
                 optimize.current_policy[row, col] = 0.0
-    
-    optimize.current_policy[-1, :] = np.maximum(0.0, 1 - np.sum(optimize.current_policy[:-1, :], axis=0))
+    '''
+    for col in range(optimize.T-1):
+        optimize.current_policy[:, col] -= np.min(optimize.current_policy[:, col])
     optimize.current_policy = optimize.current_policy / np.sum(optimize.current_policy, axis=0)
     
-    J_new = SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
+    #optimize.current_policy[-1, :] = np.maximum(0.0, 1 - np.sum(optimize.current_policy[:-1, :], axis=0))
+    #optimize.current_policy = optimize.current_policy / np.sum(optimize.current_policy, axis=0)
     
+    J_new = SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
+    print("Updated Policy: ")
+    print(optimize.current_policy)
     optimize.J.fill(0)
     
     print("J_curr = ", np.sum(J_curr))
     print("J_new = ", np.sum(J_new))
-    
+    '''
     if np.sum(J_new) > np.sum(J_curr):    
         optimize.learn_rate *= 0.8
-        optimize.current_policy[:-1, :] = temp_policy[:-1, :] - optimize.learn_rate * optimize.partial_J[:-1, :]
-        for row in range(optimize.current_policy.shape[0]-1):
-            for col in range(optimize.current_policy.shape[1]):
-                #if optimize.current_policy[row, col] > 1:
-                #    optimize.current_policy[row, col] = 1.0
-                if optimize.current_policy[row, col] < 0:
-                    optimize.current_policy[row, col] = 0.0
-        
-        optimize.current_policy[-1, :] = np.maximum(0.0, 1 - np.sum(optimize.current_policy[:-1, :], axis=0))
-        optimize.current_policy = optimize.current_policy / np.sum(optimize.current_policy, axis=0)
+        optimize.current_policy[:, :] = temp_policy[:, :] - optimize.learn_rate * optimize.partial_J[:, :]
+        for col in range(optimize.T-1):
+            optimize.current_policy[:, col] -= np.min(optimize.current_policy[:, col])
+            optimize.current_policy[:, col] = optimize.current_policy[:, col] / np.sum(optimize.current_policy[:, col])
         
         J_new = SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen = False, rng_class = rng_class)
         
         print("J_new = ", np.sum(J_new))
         optimize.J.fill(0)
-    #J_new = J_curr
-    print("Updated Policy: ")
-    print(optimize.current_policy)
+    '''
+    
     #print("Sum: ")
     #print(np.sum(optimize.current_policy, axis=0))
     print()

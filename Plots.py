@@ -14,18 +14,20 @@ from matplotlib import animation
 import matplotlib
 plt.rcParams['figure.dpi'] = 300
 
-def PlotRoom(robots):
-    colors = ["blue", "green", "yellow"]
+def PlotRoom(robots, title):
+    #colors = ["blue", "green", "black"]
+    
     plt.axvline(0, c='black', zorder=0)
     plt.axvline(robots[0].l[0], c='black', zorder=0)
     plt.axvspan(0, 5, ymin=1/12, ymax=11/12, alpha=0.3, color='gray', label='Sensor FoV')
     plt.axhline(0, c='black', zorder=0)
     plt.axhline(robots[0].l[1], c='black', zorder=0)
     for i in range(len(robots)):
-        plt.scatter(robots[i].X_act[0, :], robots[i].X_act[1, :], c = colors[i%3], s = 40, label='Robot %i act' % (i+1))
+        plt.plot(robots[i].X_act[0, :], robots[i].X_act[1, :], label='Robot %i act' % (i+1))
+        plt.scatter(robots[i].X_act[0, :], robots[i].X_act[1, :], s = 40)
         #plt.scatter(robots[i].X_est[0, :], robots[i].X_est[1, :], c = 'r', s = 6, label = "Robot est")
-    plt.legend(loc="best")
-    plt.title("Room Plot")
+    #plt.legend(loc="best")
+    plt.title(title)
     plt.xlim(0 - 1, robots[0].l[0] + 1)
     plt.ylim(0 - 1, robots[0].l[1] + 1)
     plt.show()
@@ -37,13 +39,40 @@ def PlotRoom(robots):
     plt.axhline(0, c='black', zorder=0)
     plt.axhline(robots[0].l[1], c='black', zorder=0)
     for i in range(len(robots)):
-        plt.scatter(robots[i].X_act[0, :], robots[i].X_act[1, :], c = colors[i%3], s = 40, label='Robot %i act' % (i+1))
-        plt.scatter(robots[i].X_est[0, :], robots[i].X_est[1, :], c = 'r', s = 6, label = "Robot %i est" % (i+1))
-    plt.legend(loc="best")
-    plt.title("Room Plot with Estimations")
+        plt.scatter(robots[i].X_act[0, :], robots[i].X_act[1, :], s = 40, label='Robot %i act' % (i+1))
+        plt.scatter(robots[i].X_est[0, :], robots[i].X_est[1, :], c = 'black', s = 6, label = "Robot %i est" % (i+1))
+    #plt.legend(loc="best")
+    plt.title(title + " with Estimations")
     plt.xlim(0 - 1, robots[0].l[0] + 1)
     plt.ylim(0 - 1, robots[0].l[1] + 1)
     plt.show()
+    '''
+    fig, ax = plt.subplots()
+    #im = ax.imshow(data[:, :, 0], cmap="gray")
+    label = fig.text(0, 0, "Time = " + str(robots[0].t_array[0]) + " s", fontsize=10)
+    for n in range(robots[0].N):
+        plt.scatter(robots[n].X_act[0, 0], robots[n].X_act[1, 0], s = 40, label='Robot %i act' % (n+1))
+        plt.scatter(robots[n].X_est[0, 0], robots[n].X_est[1, 0], s = 6, label = "Robot %i est" % (n+1))
+    plt.axvline(0, c='black', zorder=0)
+    plt.axvline(robots[0].l[0], c='black', zorder=0)
+    plt.axvspan(0, 5, ymin=1/12, ymax=11/12, alpha=0.3, color='gray', label='Sensor FoV')
+    plt.axhline(0, c='black', zorder=0)
+    plt.axhline(robots[0].l[1], c='black', zorder=0)
+    plt.title("Robot Animation")
+    def animate(i):
+        for n in range(robots[0].N):
+            plt.scatter(robots[n].X_act[0, i], robots[n].X_act[1, i], s = 40)
+            plt.scatter(robots[n].X_est[0, i], robots[n].X_est[1, i], s = 6)
+        label.set_text("Time = " + str(robots[0].t_array[i]) + " s")
+        return
+
+    anim = animation.FuncAnimation(fig, animate, frames=robots[0].T, repeat = False)
+
+    plt.show()
+    plt.rcParams['animation.ffmpeg_path'] = "D:\\ffmpeg-7.0.2-essentials_build\\ffmpeg-7.0.2-essentials_build\\bin\\ffmpeg.exe"
+    writer = animation.FFMpegWriter(fps=robots[0].timestep)
+    anim.save('RobotAnimation.mkv', writer=writer)
+    '''
     return
 
 def PlotGraph(robots):
@@ -96,7 +125,8 @@ def PlotGraph(robots):
 
 def PlotSensorTargets(sensors):
     for k in range(len(sensors)):
-        plt.scatter(sensors[k].t, sensors[k].targets_over_time + np.ones(sensors[k].t.shape[0]))
+        plt.scatter(sensors[k].t_array, sensors[k].targets_over_time)
+    plt.grid()
     plt.title("Sensor Target vs. Time")
     plt.ylabel("Robot Number")
     plt.xlabel("Time")
@@ -118,14 +148,16 @@ def OptimizedCost(runs, J):
     #plt.ylabel("Cost")
     plt.legend(loc="best")
     plt.show()
+    '''
     plt.scatter(runs_arr, np.sum(J, axis=0))
     plt.yscale("log")
     plt.title("Log Cost vs Iteration")
     plt.xlabel("Iteration Number")
     plt.ylabel("Cost")
     plt.show()
+    '''
 
-def PlotHeatMapAnimation(data, num_frames, title, x_label, y_label, filename):
+def PlotHeatMapAnimation(data, num_frames, title, x_label, y_label, filename, is_grad = False):
     fig, ax = plt.subplots()
     im = ax.imshow(data[:, :, 0], cmap="gray")
     label = fig.text(0, 0, "Iter: 0", fontsize=10)
@@ -133,7 +165,10 @@ def PlotHeatMapAnimation(data, num_frames, title, x_label, y_label, filename):
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.colorbar(im)
-    im.set_clim(0, 1)
+    if is_grad:
+        im.set_clim(np.min(data), np.max(data))#(0, 1)
+    else:
+        im.set_clim(0, 1)
     def animate(i):
         im.set_data(data[:, :, i])
         label.set_text("Iter:" + str(i))
@@ -143,5 +178,5 @@ def PlotHeatMapAnimation(data, num_frames, title, x_label, y_label, filename):
 
     plt.show()
     plt.rcParams['animation.ffmpeg_path'] = "D:\\ffmpeg-7.0.2-essentials_build\\ffmpeg-7.0.2-essentials_build\\bin\\ffmpeg.exe"
-    writer = animation.FFMpegWriter(fps=0.25)
+    writer = animation.FFMpegWriter(fps=1)
     anim.save(filename + '.mkv', writer=writer)

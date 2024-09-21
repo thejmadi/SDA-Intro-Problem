@@ -10,29 +10,30 @@ from matplotlib import pyplot as plt
 from matplotlib import animation
 import matplotlib
 nx = 50
-ny = 50
 
 fig, ax = plt.subplots()
-data = np.random.rand(nx, ny, 5)
-data[:, :, 0].fill(0.2)
-im = ax.imshow(data[:, :, 0], cmap="gray")
+data = np.random.rand(3, nx)
+t = np.ones((3, nx)) * np.arange(nx)
+#data[:, :, 0].fill(0.2)
+plt.xlim(-1, 51)
+plt.ylim(0, 1)
+im = ax.scatter(t[:, 0], data[:, 0])
 label = fig.text(0.1, 0.1, "Image 0", fontsize=10)
+
 plt.title("Data")
 plt.xlabel("X")
 plt.ylabel("Y")
-fig.colorbar(im)
-im.set_clim(0, 1)
 '''
 def init():
     im.set_data(data[:, :, 0])
     label.set_text("Image" + str(0))
 '''
 def animate(i):
-    im.set_data(data[:, :, i])
+    im.set_offsets((t[:, :i], data[:, :i]))
     label.set_text("Image" + str(i))
     return im
 
-anim = animation.FuncAnimation(fig, animate, frames=data.shape[2], repeat = False)
+anim = animation.FuncAnimation(fig, animate, frames=data.shape[0], repeat = False)
 
 plt.show()
 plt.rcParams['animation.ffmpeg_path'] = "D:\\ffmpeg-7.0.2-essentials_build\\ffmpeg-7.0.2-essentials_build\\bin\\ffmpeg.exe"
