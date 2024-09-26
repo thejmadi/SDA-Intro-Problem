@@ -34,15 +34,15 @@ class Environment(object):
     
     # Robot Parameters, Shown for 2 robots (x, y)
     # Note: All input noise values are var not std
-    N = 6
-    #vel = np.array([[0, 2], [0, 2], [0, 2]])
-    simple_rng = np.random.default_rng(24058)
+    N = 3
+    vel = np.array([[0, 2], [0, 2], [0, 2]])
+    #simple_rng = np.random.default_rng(24058)
     #vel = np.array([[2, 1], [2, 2], [1, -2], [-1, -2], [-1, -2], [-1, 1], [-2, 2], [-1, 1]])
-    #start_pos = np.array([[2.5, 0], [7, 0], [8, 0]])
+    start_pos = np.array([[2.5, 0], [7, 0], [8, 0]])
     #start_pos = np.zeros((6, 2))#np.array([[0, 0], [0, 5], [0, 10], [5, 10], [10, 10], [10, 5], [10, 0], [5, 0]])
-    vel = simple_rng.uniform(-2, 2, size=(6, 2))
-    start_pos = simple_rng.uniform(2, 8, size=(6, 2))
-    Q_robot = (np.ones((6, 4)) @ np.diag([0.01, 0.01, 0, 0])) * np.abs(np.hstack((vel, start_pos)))
+    #vel = simple_rng.uniform(-2, 2, size=(6, 2))
+    #start_pos = simple_rng.uniform(2, 8, size=(6, 2))
+    Q_robot = (np.ones((3, 4)) @ np.diag([0.01, 0.01, 0, 0])) * np.abs(np.hstack((vel, start_pos)))
     
     # Sensor Parameters, Shown for 2 sensor, Only using first 1
     sensor_position = np.array([[0, 0], [0, 0]])

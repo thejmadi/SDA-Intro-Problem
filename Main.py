@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     # Create Instances of robots, 1 of type 1, 1 of type 2
     robots = []
-    for k in range(6):
+    for k in range(3):
         robots.append(ent.Robot(k))
     robots[0].number_robots = len(robots)
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
         rng_class = None
     
     fc.KF(robots, sensors, optimize, False, False)
-    plot.PlotGraph(robots)
+    #plot.PlotGraph(robots)
     plot.PlotRoom(robots, "Robot Trajectories")
     robots[0].Q_robot.fill(0)
     fc.ResetInstances(robots, sensors)
