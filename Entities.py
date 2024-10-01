@@ -19,30 +19,30 @@ import itertools as it
 class Environment(object):
     l = np.array([10, 10])                                                     # Length of room (x,y)
     dim_state, dim_msmt = 4, 2
-    num_iter = 12
+    num_iter = 15
     
-    time_start, time_end = 0, 16
+    time_start, time_end = 0, 12
     timestep = 1
     t_array = np.arange(time_start, time_end + timestep, timestep)
     T = t_array.shape[0]
     
     #MC_runs = 100
-    MC_runs = 180
+    MC_runs = 100
     G, M = timestep*np.identity(dim_state), np.identity(dim_msmt)
     
     sig_bounds = 3
     
     # Robot Parameters, Shown for 2 robots (x, y)
     # Note: All input noise values are var not std
-    N = 3
-    vel = np.array([[0, 2], [0, 2], [0, 2]])
-    #simple_rng = np.random.default_rng(24058)
+    N = 6
+    #vel = np.array([[0, 2], [0, 2], [0, 2]])
+    simple_rng = np.random.default_rng(24058)
     #vel = np.array([[2, 1], [2, 2], [1, -2], [-1, -2], [-1, -2], [-1, 1], [-2, 2], [-1, 1]])
-    start_pos = np.array([[2.5, 0], [7, 0], [8, 0]])
+    #start_pos = np.array([[2.5, 0], [7, 0], [8, 0]])
     #start_pos = np.zeros((6, 2))#np.array([[0, 0], [0, 5], [0, 10], [5, 10], [10, 10], [10, 5], [10, 0], [5, 0]])
-    #vel = simple_rng.uniform(-2, 2, size=(6, 2))
-    #start_pos = simple_rng.uniform(2, 8, size=(6, 2))
-    Q_robot = (np.ones((3, 4)) @ np.diag([0.01, 0.01, 0, 0])) * np.abs(np.hstack((vel, start_pos)))
+    vel = simple_rng.uniform(-2, 2, size=(6, 2))
+    start_pos = simple_rng.uniform(2, 8, size=(6, 2))
+    Q_robot = (np.ones((6, 4)) @ np.diag([0.01, 0.01, 0, 0])) * np.abs(np.hstack((vel, start_pos)))
     
     # Sensor Parameters, Shown for 2 sensor, Only using first 1
     sensor_position = np.array([[0, 0], [0, 0]])
@@ -62,7 +62,7 @@ class Environment(object):
     optimal_policy = np.zeros((current_policy.shape))
     min_cost = 100000
     min_iter = 0
-    learn_rate = 0.05
+    learn_rate = 0.08
     
     seed = 98765
         
@@ -208,9 +208,13 @@ class Optimization(Environment):
     # Updates either self.J or self.frozen_J 
     def UpdateJ(self, cov, n, t, is_frozen):
         if not is_frozen:
-            self.J[n, t] += np.trace(cov[:2, :2]) / self.MC_runs
+            #print(la.det(cov[:2, :2]))
+            #print(la.slogdet(cov[:2, :2])[1])
+            #self.J[n, t] += np.trace(cov) / self.MC_runs
+            self.J[n, t] += la.slogdet(cov[:2, :2])[1] / self.MC_runs
         else:
-            self.frozen_J[n, t] += np.trace(cov) / self.MC_runs
+            #self.frozen_J[n, t] += np.trace(cov) / self.MC_runs
+            self.frozen_J[n, t] += la.slogdet(cov[:2, :2])[1] / self.MC_runs
         
     def UpdatePartialJ(self, n, t):
         self.partial_J[n, t] = np.sum(self.frozen_J)
