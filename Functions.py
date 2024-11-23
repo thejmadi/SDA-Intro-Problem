@@ -17,6 +17,7 @@ import Plots as plot
 import multiprocessing as mlt
 import matplotlib.pyplot as plt
 import copy
+import time
 #import sys
 
 
@@ -25,12 +26,12 @@ def ErrorBars(robot, k):
     return
 
 def ResetInstances(robots, sensors):
-    for k in range(6):
+    for k in range(10):
         robots[k].Reset(k)
     for k in range(1):
         sensors[k].Reset(k)
 
-def KF(robots, sensors, optimize, is_multi, is_frozen, rng_child = None):
+def KF(robots, sensors, optimize, is_multi, is_frozen, rng_child = None, current_policy=None):
     #rng_child.random()
     dim_state = robots[0].dim_state
     dim_msmt = robots[0].dim_msmt
@@ -58,10 +59,13 @@ def KF(robots, sensors, optimize, is_multi, is_frozen, rng_child = None):
             
             ErrorBars(robots[n], t+1)
             F.fill(0)
+            
+            # Check whether all robots are in FoV
+            sensors[0].robots_in_FoV[n, t] = sensors[0].InFoV(robots[n].X_act[:, t+1])
         
         # 2a. Check if all actual X's is in sensors FoV
         for s in range(num_sensors):
-            robot_choice = optimize.Tasking(t, is_multi, is_frozen, rng_child)
+            robot_choice = optimize.Tasking(t, is_multi, is_frozen, rng_child, current_policy)
             if sensors[s].InFoV(robots[robot_choice].X_act[:, t+1]):
                 #print(k, robot_choice+1)
                 sensors[s].SwitchTarget(robots[robot_choice], t+1, robot_choice)
@@ -87,7 +91,7 @@ def KF(robots, sensors, optimize, is_multi, is_frozen, rng_child = None):
 
                 # Update est P
                 sensors[s].target.P = (I - sensors[s].K @ H) @ sensors[s].target.P
-
+                
                 ErrorBars(sensors[s].target, t+1)
                 H.fill(0)
         
@@ -100,8 +104,8 @@ def KF(robots, sensors, optimize, is_multi, is_frozen, rng_child = None):
 def SimulatePolicy(robots, sensors, optimize, is_multi, is_frozen, rng_class):
     if is_multi:
         J_policy = MultiMonteCarlo(robots, sensors, optimize, is_frozen, rng_class)
-    else:
-        J_policy = MonteCarlo(robots, sensors, optimize, is_frozen)
+    #else:
+    #    J_policy = MonteCarlo(robots, sensors, optimize, is_frozen)
     optimize.J.fill(0)
     return J_policy
     
@@ -184,10 +188,12 @@ def MultiTaskFunction(robots, sensors, optimize, is_frozen, child_id):
 # Uses Multiprocessing
 def MultiMonteCarlo(robots, sensors, optimize, is_frozen, rng_class):
     J_run = np.zeros((optimize.N, optimize.T-1))
+    start = time.time()
     with mlt.Pool(6) as pool:
         multi_results = [pool.apply_async(MultiTaskFunction, args=(robots, sensors, optimize, is_frozen, rng_class.rng_children[child_id])) for child_id in range(optimize.MC_runs)]
         for r in multi_results:
             J_run += r.get()
+    print(time.time() - start)
     # Calc Total Cost for 1 Monte Carlo batch
     if is_frozen:
         optimize.frozen_J = copy.deepcopy(J_run)

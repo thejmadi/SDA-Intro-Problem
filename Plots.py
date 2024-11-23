@@ -14,18 +14,18 @@ from matplotlib import animation
 import matplotlib
 plt.rcParams['figure.dpi'] = 300
 
-def PlotRoom(robots):
-    colors = ["blue", "green", "yellow"]
+def PlotRoom(robots, title):
     plt.axvline(0, c='black', zorder=0)
     plt.axvline(robots[0].l[0], c='black', zorder=0)
     plt.axvspan(0, 5, ymin=1/12, ymax=11/12, alpha=0.3, color='gray', label='Sensor FoV')
     plt.axhline(0, c='black', zorder=0)
     plt.axhline(robots[0].l[1], c='black', zorder=0)
     for i in range(len(robots)):
-        plt.scatter(robots[i].X_act[0, :], robots[i].X_act[1, :], c = colors[i%3], s = 40, label='Robot %i act' % (i+1))
+        plt.plot(robots[i].X_act[0, :], robots[i].X_act[1, :], label='Robot %i act' % (i+1))
+        plt.scatter(robots[i].X_act[0, :], robots[i].X_act[1, :], s = 40)
         #plt.scatter(robots[i].X_est[0, :], robots[i].X_est[1, :], c = 'r', s = 6, label = "Robot est")
-    plt.legend(loc="best")
-    plt.title("Room Plot")
+    #plt.legend(loc="best")
+    plt.title(title)
     plt.xlim(0 - 1, robots[0].l[0] + 1)
     plt.ylim(0 - 1, robots[0].l[1] + 1)
     plt.show()
@@ -37,9 +37,9 @@ def PlotRoom(robots):
     plt.axhline(0, c='black', zorder=0)
     plt.axhline(robots[0].l[1], c='black', zorder=0)
     for i in range(len(robots)):
-        plt.scatter(robots[i].X_act[0, :], robots[i].X_act[1, :], c = colors[i%3], s = 40, label='Robot %i act' % (i+1))
+        plt.scatter(robots[i].X_act[0, :], robots[i].X_act[1, :], s = 40, label='Robot %i act' % (i+1))
         plt.scatter(robots[i].X_est[0, :], robots[i].X_est[1, :], c = 'r', s = 6, label = "Robot %i est" % (i+1))
-    plt.legend(loc="best")
+    #plt.legend(loc="best")
     plt.title("Room Plot with Estimations")
     plt.xlim(0 - 1, robots[0].l[0] + 1)
     plt.ylim(0 - 1, robots[0].l[1] + 1)
@@ -103,29 +103,55 @@ def PlotSensorTargets(sensors):
     plt.show()
     return
 
-def OptimizedCost(runs, J):
+def OptimizedCost(runs, J, title):
     runs_arr = np.arange(0, runs+1, 1)
-    for k in range(J.shape[0]):
-        plt.plot(runs_arr, J[k, :], label="Robot " + str(k+1), linewidth=1.5)
-    plt.title("Cost per Robot vs Iteration")
+    #for k in range(J.shape[0]):
+    #    plt.plot(runs_arr, J[k, :], label="Robot " + str(k+1), linewidth=1.5)
+    plt.title(title)
     plt.xlabel("Iteration Number")
     plt.ylabel("Cost")
     #print(runs_arr)
     #print(J)
+    
     plt.plot(runs_arr, np.sum(J, axis=0), label="Total", linewidth=1.5)
     #plt.title("Total Cost vs Iteration")
     #plt.xlabel("Iteration Number")
     #plt.ylabel("Cost")
-    plt.legend(loc="best")
+    #plt.legend(loc="best")
     plt.show()
+    '''
     plt.scatter(runs_arr, np.sum(J, axis=0))
     plt.yscale("log")
     plt.title("Log Cost vs Iteration")
     plt.xlabel("Iteration Number")
     plt.ylabel("Cost")
     plt.show()
+    '''
+    
+def MCMCBurns(num_burn, data, title, spacer):
+    runs_arr = np.arange(0, num_burn, 1)
+    #burn_space = np.arange(0, num_burn, spacer, dtype=int)
+    plt.plot(runs_arr, data, linewidth=1.5)
+    #plt.scatter(burn_space, data[burn_space], s=10, c='r', zorder=1)
+    #plt.scatter(burn_space, data[burn_space], c='r', s=1)
+    plt.title(title)
+    plt.xlabel("Iteration Number")
+    plt.ylabel("Cost")
+    plt.show()
 
-def PlotHeatMapAnimation(data, num_frames, title, x_label, y_label, filename):
+def MCMCSamples(num_burn, data, title, spacers):
+    runs_arr = np.arange(0, num_burn, 1)
+    idxs = [np.sum(spacers[:i]) for i in range(1, spacers.shape[0])]
+    idxs.append(np.sum(spacers))
+    plt.plot(runs_arr, data, linewidth=1.5)
+    #plt.scatter(idxs, data[idxs], s=10, c='r', zorder=1)
+    #plt.scatter(burn_space, data[burn_space], c='r', s=1)
+    plt.title(title)
+    plt.xlabel("Iteration Number")
+    plt.ylabel("Cost")
+    plt.show()
+
+def PlotHeatMapAnimation(data, num_frames, title, x_label, y_label, filename, is_grad = False, is_cost = False):
     fig, ax = plt.subplots()
     im = ax.imshow(data[:, :, 0], cmap="gray")
     label = fig.text(0, 0, "Iter: 0", fontsize=10)
@@ -133,15 +159,32 @@ def PlotHeatMapAnimation(data, num_frames, title, x_label, y_label, filename):
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.colorbar(im)
-    im.set_clim(0, 1)
+    if is_grad or is_cost:
+        im.set_clim(min(np.min(data), 0), np.max(data))#(0, 1)
+    else:
+        im.set_clim(0, 1)
     def animate(i):
         im.set_data(data[:, :, i])
         label.set_text("Iter:" + str(i))
         return im
-
+    
     anim = animation.FuncAnimation(fig, animate, frames=data.shape[2], repeat = False)
 
     plt.show()
     plt.rcParams['animation.ffmpeg_path'] = "D:\\ffmpeg-7.0.2-essentials_build\\ffmpeg-7.0.2-essentials_build\\bin\\ffmpeg.exe"
-    writer = animation.FFMpegWriter(fps=0.25)
+    writer = animation.FFMpegWriter(fps=4)
     anim.save(filename + '.mkv', writer=writer)
+
+def PlotMCMCHist(data, title, x_label, y_label):
+    percent = data
+    fig, ax = plt.subplots()
+    im = ax.imshow(percent, cmap="gray")
+    plt.title(title)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.colorbar(im)
+    #im.set_clim(0, 1)
+    plt.show()
+    
+    
+    
