@@ -102,6 +102,7 @@ class Simulation():
         pass
     
     def KalmanFilter(self, policy):
+        
         I = np.identity(self.dim_state)
         G, M = self.time_step*np.identity(self.dim_state), np.identity(self.dim_msmt)
         
@@ -113,6 +114,7 @@ class Simulation():
         for t in range(self.T - 1):
             #print("k: ", k)
             # 1. Propagate
+            
             for n in range(self.N):
                 self.robots[n].ErrorBars(t)
                 
@@ -128,10 +130,10 @@ class Simulation():
                 
                 #ErrorBars(robots[n], t+1)
                 F.fill(0)
-        
+            
             # 2b. Update X, P of sensors' targets
             for s in range(self.S):
-                target = self.robots[sim.sensors[s].chosen_robots[t]]
+                target = self.robots[self.sensors[s].chosen_robots[t]]
                 if self.sensors[s].obs_heat_map[target.id, t]:
                     # Take observation data from actual X
                     target.Y_act[:, t+1], _ = self.sensors[s].Observation(target.X_act[:, t+1], self.is_stochastic)
@@ -153,10 +155,11 @@ class Simulation():
     
                     self.robots[n].ErrorBars(t+1)
                     H.fill(0)
-                                
+            
             # Compute J
             for n in range(self.N):
                 self.CalcCost(self.robots[n].P, n, t)
+        
         return self.cost
     
 class Robot():
@@ -165,8 +168,8 @@ class Robot():
     #r_0_list = np.array([[0.5, 0], [1, 0], [1.5, 0], [2, 0], [2.5, 0], [3, 0], [3.5, 0], [4, 0], [4.5, 0], [5, 0]])
     #v_0_list = np.array([[0, 2], [0, 2], [0, 2], [0, 2], [0, 2], [0, 2], [0, 2], [0, 2], [0, 2], [0, 2]])
     simple_rng = np.random.default_rng(24058)
-    r_0_list = simple_rng.uniform(2, 8, size=(10, 2))
-    v_0_list = simple_rng.uniform(-2, 2, size=(10, 2))
+    r_0_list = simple_rng.uniform(2, 8, size=(20, 2))
+    v_0_list = simple_rng.uniform(-2, 2, size=(20, 2))
     #Q_list = (np.ones((10, 4)) @ np.diag([0.01, 0.01, 0, 0])) * np.abs(np.hstack((v_0_list, r_0_list)))
     sigma_bounds = 3
     
@@ -375,8 +378,8 @@ class Optimization:
 class MCMC():
     num_processes = 6
     num_samples = 1000
-    num_burn = 1000
-    tol = 5e-4
+    #num_burn = 2
+    tol = 5e-3
     burn_window_len = 500
     sample_window_len = 500
     independent_samples = False
@@ -408,6 +411,8 @@ class MCMC():
             for r in final_policies_and_costs:
                 rng_class.num_to_burn[r[8]] += r[9]
         #    print(time.time() - start)
+        #print(final_policies_and_costs)
+        #print(final_policies_and_costs[0])
         return final_policies_and_costs
     
     def Proposal(self, current_policy, rng_child):
@@ -415,9 +420,9 @@ class MCMC():
         proposed_policy[:, :] = current_policy
         proposed_idx = (rng_child.integers(low=0, high=self.N), rng_child.integers(low=0, high=self.T-1))
         rng_burn = 2
-        while proposed_policy[proposed_idx] == 1:
-            proposed_idx = (rng_child.integers(low=0, high=self.N), rng_child.integers(low=0, high=self.T-1))
-            rng_burn += 2
+        #while proposed_policy[proposed_idx] == 1:
+        #    proposed_idx = (rng_child.integers(low=0, high=self.N), rng_child.integers(low=0, high=self.T-1))
+        #    rng_burn += 2
         proposed_policy[:, proposed_idx[1]].fill(0)
         proposed_policy[proposed_idx] = 1
         return proposed_policy, rng_burn
@@ -437,6 +442,7 @@ class MCMC():
         current_policy = np.zeros((self.N, self.T-1))
         current_policy[:, :], temp_burn = self.GenerateInitialPolicy(rng_child)
         rng_burn = temp_burn
+        
         # Evaluate costs
         current_costs = np.zeros(self.N)
         current_costs[:] = np.sum(sim.KalmanFilter(current_policy), axis=1)            
@@ -451,7 +457,7 @@ class MCMC():
         # Avg information
         running_sum_recip = np.sum(current_costs)
         burn_running_avg_recip = [running_sum_recip / (burn_total)]
-        prev_avg_recip = burn_running_avg_recip[-1] + 3*self.tol
+        prev_avg_recip = self.tol
         new_avg_recip = burn_running_avg_recip[-1]
         
         # Best policy information
@@ -462,8 +468,9 @@ class MCMC():
         best_policy_idx = len(costs) -1
         
         start = time.time()
-        #while np.abs(new_avg_recip - prev_avg_recip)/prev_avg_recip >= self.tol:
-        for i in range(1, self.num_burn):
+        #print(new_avg_recip, prev_avg_recip, self.tol)
+        while np.abs(new_avg_recip - prev_avg_recip)/prev_avg_recip >= self.tol:
+        #for i in range(1, self.num_burn):
             burn_total += 1
             proposed_policy, temp_burn = self.Proposal(current_policy, rng_child)
             rng_burn += temp_burn
@@ -513,7 +520,7 @@ class MCMC():
         converged_avg_recip = burn_running_avg_recip[-1]
         running_sum_recip = 0
         sample_running_avg_recip = [converged_avg_recip / sample_totals[0]]
-        prev_avg_recip = converged_avg_recip + 3*self.tol
+        prev_avg_recip = self.tol
         new_avg_recip = converged_avg_recip
         #plot.MCMCBurns(burn_total, np.asarray(burn_running_avg), "Burn AVG(J) vs Iteration", self.burn_window_len)
         #plot.MCMCBurns(burn_total, np.asarray(burn_running_avg_recip), "Burn AVG(1/J) vs Iteration", self.burn_window_len)
@@ -684,13 +691,13 @@ class Plotting():
         pass
 
 if __name__ == '__main__':
-    num_sims = 10
-    sim_MC = 12
+    num_sims = 1
+    sim_MC = 6
     var_incr = 20
-    global_vars = {"N_total" : 10,
+    global_vars = {"N_total" : num_sims*var_incr,
                    "S" : 1,
                    "time_start" : 0,
-                   "time_end" : num_sims*var_incr+1,
+                   "time_end" : 21,#num_sims*var_incr+1,
                    "time_step" : 1,
                    "dim_state" : 4,
                    "dim_msmt" : 2}
@@ -698,41 +705,43 @@ if __name__ == '__main__':
     rng_class = RNG(sim_MC)
     mcmc = MCMC(global_vars)
     sim = Simulation(global_vars)
-    sim.ResetSimulation(global_vars["N_total"], var_incr+1, partial_reset=False)
+    #sim.ResetSimulation(global_vars["N_total"], var_incr+1, partial_reset=False)
+    sim.ResetSimulation(var_incr, global_vars["time_end"], partial_reset=False)
     sim.Deterministic()
     mcmc_results = []
     costs = []
     samples = []
-    burn_num = np.zeros((num_sims, sim_MC))
+    burn_num = np.zeros((num_sims, sim_MC), dtype=int)
     burn_avg = np.zeros((num_sims, sim_MC))
     timer = []
     
     for i in range(1, num_sims+1):
         print("Sim # " + str(i))
         start = time.time()
-        mcmc_results.append([])
-        samples.append([])
-        N, T = global_vars["N_total"], i*var_incr+1
+        #mcmc_results.append([])
+        #samples.append([])
+        T, N = global_vars["time_end"], i*var_incr
         sim.ResetSimulation(N, T, partial_reset=False)
         #for k in range(sim_MC):
         sim.ResetSimulation(N, T, partial_reset=True)
         mcmc.Reset(N, T)
-        mcmc_results[i-1].append(mcmc.ParallelizeChains(sim, sim_MC, rng_class))
-        costs.append(np.sum(mcmc_results[i-1][-1][0][0], axis=0))
-        #burn_num[i-1, k] = len(mcmc_results[i-1][-1][0][2])
-        #burn_avg[i-1, k] = mcmc_results[i-1][-1][0][2][-1]
-        samples[i-1].append(mcmc_results[i-1][-1][0][1])
-            #plotter.PlotLine(mcmc_results[i-1][-1][0][2], "Burn Avg(1/J)", "Iteration", "Running Avg")
+        mcmc_results.append(mcmc.ParallelizeChains(sim, sim_MC, rng_class))
+        for k in range(sim_MC):
+            #costs.append(np.sum(mcmc_results[i-1][k][0], axis=0))
+            burn_num[i-1, k] = len(mcmc_results[i-1][k][2])
+            burn_avg[i-1, k] = mcmc_results[i-1][k][2][-1]
+            samples.append(mcmc_results[i-1][k][1])
+            plotter.PlotLine(range(burn_num[i-1, k]), mcmc_results[i-1][k][2], "Burn Avg", "Iteration", "Running Avg", False)
             #plotter.PlotRoom(sim.robots, plot_est=False)
         #plotter.PlotRoom(sim.robots, plot_est=False)
         #plotter.PlotLine(mcmc_results[i-1][0][3], "Sample Avg(1/J)", "Iteration", "Running Avg")
         #plotter.PlotHeatMap(np.sum(samples, axis=2)/samples.shape[2], "Aggregated Samples", "Timestep", "Robot", normalize=True)
         timer.append(time.time() - start)
     # Plots for varying T and N
-    #burn_num_std = np.std(burn_num, axis=1)
-    #plotter.PlotLine(range(var_incr, (num_sims+1)*var_incr, var_incr), np.sum(burn_num, axis=1)/sim_MC, "Number of Iterations Until Convergence at " + str(global_vars["N_total"]), "Number of Timesteps", "Avg Number of Burns", True, burn_num_std, 'o')
-    #burn_avg_std = np.std(burn_avg, axis=1)
-    #plotter.PlotLine(range(var_incr, (num_sims+1)*var_incr, var_incr), np.sum(burn_avg, axis=1)/sim_MC, "Converged Running Avg at " + str(global_vars["N_total"]), "Number of Timesteps", "Running Avg", True, burn_avg_std)
+    burn_num_std = np.std(burn_num, axis=1)
+    plotter.PlotLine(range(var_incr, (num_sims+1)*var_incr, var_incr), np.sum(burn_num, axis=1)/sim_MC, "Mixing Time, T = " + str(global_vars["time_end"]), "Number of Robots", "Avg Number of Burns", True, burn_num_std, 'o')
+    burn_avg_std = np.std(burn_avg, axis=1)
+    plotter.PlotLine(range(var_incr, (num_sims+1)*var_incr, var_incr), np.sum(burn_avg, axis=1)/sim_MC, "Converged Avg, T = " + str(global_vars["time_end"]), "Number of Robots", "Running Avg", True, burn_avg_std, 'None')
     
     #plotter.PlotLine(costs, "Burn and Sample Cost vs Iteration", "Iteration", "Cost")
     #plotter.PlotLine(costs[burn_num:], "Sample Cost vs Iteration", "Iteration", "Cost")
